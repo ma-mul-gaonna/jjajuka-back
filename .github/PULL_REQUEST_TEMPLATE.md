@@ -1,8 +1,3 @@
----
-name: PR 생성 템플릿
-title: "feat/fix/chore/docs: PR 제목"
-
----
 
 ### ✅  PR Type
 
