@@ -1,4 +1,4 @@
-package com.mmgon.dutyflow.domain.rule.entity;
+package com.mmgon.jjajuka.domain.rule.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,9 +17,12 @@ public class ScheduleRule {
     @Column(name = "rule_name", length = 50, nullable = false)
     private String ruleName;
 
+    @Column(name = "rule_type", length = 50, nullable = false)
+    private String ruleType;
+
     @Column(name = "rule_value", length = 50, nullable = false)
     private String ruleValue;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    private Boolean isActive;
 }

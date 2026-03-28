@@ -1,4 +1,4 @@
-package com.mmgon.dutyflow.global.enums;
+package com.mmgon.jjajuka.global.enums;
 
 public enum ScheduleType {
     DAY, EVENING, NIGHT
