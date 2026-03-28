@@ -1,7 +1,6 @@
-package com.mmgon.jjajuka.domain.replacementcandidate.entity;
+package com.mmgon.jjajuka.domain.vacancy.entity;
 
 import com.mmgon.jjajuka.domain.member.entity.Member;
-import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,8 +23,8 @@ public class ReplacementCandidate {
     @JoinColumn(name = "candidate_member_id", nullable = false)
     private Member candidateMember;
 
-    @Column(name = "rank")
-    private Integer rank;
+    @Column(name = "candidate_rank")
+    private Integer candidateRank;
 
     @Column(length = 255)
     private String reason;
