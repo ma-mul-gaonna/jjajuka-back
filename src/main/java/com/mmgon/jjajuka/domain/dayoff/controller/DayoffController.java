@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.dayoff.controller;
+package com.mmgon.jjajuka.domain.dayoff.controller;
 
-import com.mmgon.dutyflow.domain.dayoff.entity.Dayoff;
-import com.mmgon.dutyflow.domain.dayoff.service.DayoffService;
+import com.mmgon.jjajuka.domain.dayoff.entity.Dayoff;
+import com.mmgon.jjajuka.domain.dayoff.service.DayoffService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

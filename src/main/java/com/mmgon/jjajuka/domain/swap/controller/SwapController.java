@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.swap.controller;
+package com.mmgon.jjajuka.domain.swap.controller;
 
-import com.mmgon.dutyflow.domain.swap.entity.Swap;
-import com.mmgon.dutyflow.domain.swap.service.SwapService;
+import com.mmgon.jjajuka.domain.swap.entity.Swap;
+import com.mmgon.jjajuka.domain.swap.service.SwapService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

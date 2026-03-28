@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.notification.service;
+package com.mmgon.jjajuka.domain.notification.service;
 
-import com.mmgon.dutyflow.domain.notification.entity.Notification;
-import com.mmgon.dutyflow.domain.notification.repository.NotificationRepository;
+import com.mmgon.jjajuka.domain.notification.entity.Notification;
+import com.mmgon.jjajuka.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

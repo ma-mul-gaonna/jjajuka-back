@@ -1,7 +1,8 @@
-package com.mmgon.dutyflow.domain.vacancy.entity;
+package com.mmgon.jjajuka.domain.vacancy.entity;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.domain.schedule.entity.Schedule;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
+import com.mmgon.jjajuka.global.enums.VacancyStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,10 @@ public class Vacancy {
 
     @Column(name = "created_at", nullable = false)
     private LocalDate createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private VacancyStatus status;
 
     @Column(length = 255)
     private String reason;

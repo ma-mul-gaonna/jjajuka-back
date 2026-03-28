@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.member.service;
+package com.mmgon.jjajuka.domain.member.service;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.domain.member.repository.MemberRepository;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.rule.service;
+package com.mmgon.jjajuka.domain.rule.service;
 
-import com.mmgon.dutyflow.domain.rule.entity.RuleCustom;
-import com.mmgon.dutyflow.domain.rule.repository.RuleCustomRepository;
+import com.mmgon.jjajuka.domain.rule.entity.RuleCustom;
+import com.mmgon.jjajuka.domain.rule.repository.RuleCustomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

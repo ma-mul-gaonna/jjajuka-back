@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.vacancy.controller;
+package com.mmgon.jjajuka.domain.vacancy.controller;
 
-import com.mmgon.dutyflow.domain.vacancy.entity.Vacancy;
-import com.mmgon.dutyflow.domain.vacancy.service.VacancyService;
+import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.domain.vacancy.service.VacancyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
