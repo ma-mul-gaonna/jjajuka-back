@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.schedule.controller;
+package com.mmgon.jjajuka.domain.schedule.controller;
 
-import com.mmgon.dutyflow.domain.schedule.entity.Schedule;
-import com.mmgon.dutyflow.domain.schedule.service.ScheduleService;
+import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
+import com.mmgon.jjajuka.domain.schedule.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

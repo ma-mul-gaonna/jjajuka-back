@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.dayoff.service;
+package com.mmgon.jjajuka.domain.dayoff.service;
 
-import com.mmgon.dutyflow.domain.dayoff.entity.Dayoff;
-import com.mmgon.dutyflow.domain.dayoff.repository.DayoffRepository;
+import com.mmgon.jjajuka.domain.dayoff.entity.Dayoff;
+import com.mmgon.jjajuka.domain.dayoff.repository.DayoffRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

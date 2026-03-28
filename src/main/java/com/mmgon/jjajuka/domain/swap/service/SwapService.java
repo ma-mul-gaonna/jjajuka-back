@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.swap.service;
+package com.mmgon.jjajuka.domain.swap.service;
 
-import com.mmgon.dutyflow.domain.swap.entity.Swap;
-import com.mmgon.dutyflow.domain.swap.repository.SwapRepository;
+import com.mmgon.jjajuka.domain.swap.entity.Swap;
+import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

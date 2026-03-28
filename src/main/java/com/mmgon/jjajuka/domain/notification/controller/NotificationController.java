@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.notification.controller;
+package com.mmgon.jjajuka.domain.notification.controller;
 
-import com.mmgon.dutyflow.domain.notification.entity.Notification;
-import com.mmgon.dutyflow.domain.notification.service.NotificationService;
+import com.mmgon.jjajuka.domain.notification.entity.Notification;
+import com.mmgon.jjajuka.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

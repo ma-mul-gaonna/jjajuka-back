@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.rule.controller;
+package com.mmgon.jjajuka.domain.rule.controller;
 
-import com.mmgon.dutyflow.domain.rule.entity.RuleCustom;
-import com.mmgon.dutyflow.domain.rule.service.RuleCustomService;
+import com.mmgon.jjajuka.domain.rule.entity.RuleCustom;
+import com.mmgon.jjajuka.domain.rule.service.RuleCustomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
