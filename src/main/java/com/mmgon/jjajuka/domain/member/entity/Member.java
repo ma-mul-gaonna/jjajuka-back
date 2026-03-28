@@ -1,6 +1,6 @@
-package com.mmgon.dutyflow.domain.member.entity;
+package com.mmgon.jjajuka.domain.member.entity;
 
-import com.mmgon.dutyflow.global.enums.Authority;
+import com.mmgon.jjajuka.global.enums.Authority;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,10 +21,10 @@ public class Member {
     @Column(name = "login_id", length = 255, nullable = false, unique = true)
     private String loginId;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 100, nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "authority", nullable = false)
     private Authority authority;
 }

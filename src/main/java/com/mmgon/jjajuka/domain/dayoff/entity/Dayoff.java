@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.dayoff.entity;
+package com.mmgon.jjajuka.domain.dayoff.entity;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.global.enums.DayoffStatus;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.global.enums.DayoffStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,8 +1,8 @@
-package com.mmgon.dutyflow.domain.swap.entity;
+package com.mmgon.jjajuka.domain.swap.entity;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.domain.schedule.entity.Schedule;
-import com.mmgon.dutyflow.global.enums.SwapStatus;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
+import com.mmgon.jjajuka.global.enums.SwapStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

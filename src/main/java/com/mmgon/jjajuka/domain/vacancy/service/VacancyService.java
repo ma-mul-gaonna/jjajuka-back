@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.vacancy.service;
+package com.mmgon.jjajuka.domain.vacancy.service;
 
-import com.mmgon.dutyflow.domain.vacancy.entity.Vacancy;
-import com.mmgon.dutyflow.domain.vacancy.repository.VacancyRepository;
+import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.mmgon.dutyflow.domain.rule.entity;
+package com.mmgon.jjajuka.domain.rule.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

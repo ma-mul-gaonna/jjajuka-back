@@ -1,8 +1,8 @@
-package com.mmgon.dutyflow.domain.schedule.entity;
+package com.mmgon.jjajuka.domain.schedule.entity;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.global.enums.ScheduleStatus;
-import com.mmgon.dutyflow.global.enums.ScheduleType;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.global.enums.ScheduleStatus;
+import com.mmgon.jjajuka.global.enums.ScheduleType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +20,10 @@ public class Schedule {
     private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_group_id", nullable = false)
+    private ScheduleGroup scheduleGroup;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
@@ -28,7 +32,7 @@ public class Schedule {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ScheduleType type;
+    private ScheduleType shiftType;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

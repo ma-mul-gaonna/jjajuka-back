@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.member.controller;
+package com.mmgon.jjajuka.domain.member.controller;
 
-import com.mmgon.dutyflow.domain.member.entity.Member;
-import com.mmgon.dutyflow.domain.member.service.MemberService;
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

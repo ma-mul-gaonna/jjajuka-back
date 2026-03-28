@@ -1,7 +1,7 @@
-package com.mmgon.dutyflow.domain.rule.service;
+package com.mmgon.jjajuka.domain.rule.service;
 
-import com.mmgon.dutyflow.domain.rule.entity.ScheduleRule;
-import com.mmgon.dutyflow.domain.rule.repository.ScheduleRuleRepository;
+import com.mmgon.jjajuka.domain.rule.entity.ScheduleRule;
+import com.mmgon.jjajuka.domain.rule.repository.ScheduleRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
