@@ -11,7 +11,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/members")
 @RequiredArgsConstructor
-public class MemberController {
+public class
+MemberController {
 
     private final MemberService memberService;
 
