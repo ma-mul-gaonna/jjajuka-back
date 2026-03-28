@@ -1,7 +1,6 @@
 package com.mmgon.jjajuka.domain.schedule.entity;
 
 import com.mmgon.jjajuka.domain.member.entity.Member;
-import com.mmgon.jjajuka.domain.schedulegroup.entity.ScheduleGroup;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.ScheduleType;
 import jakarta.persistence.*;

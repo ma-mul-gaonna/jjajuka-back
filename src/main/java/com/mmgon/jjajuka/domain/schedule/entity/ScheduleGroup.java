@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.schedulegroup.entity;
+package com.mmgon.jjajuka.domain.schedule.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -14,8 +14,8 @@ public class ScheduleGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "year_month", length = 10)
-    private String yearMonth;
+    @Column(name = "schedule_year_month", length = 10)
+    private String scheduleYearMonth;
 
     @Column(length = 255)
     private String reason;
