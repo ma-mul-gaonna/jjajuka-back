@@ -1,0 +1,23 @@
+package com.mmgon.jjajuka.domain.swap.exception;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+
+@Getter
+@RequiredArgsConstructor
+public enum SwapErrorCode {
+    UNAUTHORIZED("UNAUTHORIZED", "로그인이 필요합니다.", HttpStatus.UNAUTHORIZED),
+    TARGET_MEMBER_NOT_FOUND("TARGET_MEMBER_NOT_FOUND", "대상 구성원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    CANNOT_SWAP_WITH_SELF("CANNOT_SWAP_WITH_SELF", "자기 자신과는 교대 요청을 할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_SCHEDULE("INVALID_SCHEDULE", "교대 요청이 불가능한 스케줄입니다.", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_FOUND("SCHEDULE_NOT_FOUND", "스케줄을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SCHEDULE_NOT_BELONG_TO_REQUESTER("SCHEDULE_NOT_BELONG_TO_REQUESTER", "해당 스케줄은 요청자의 것이 아닙니다.", HttpStatus.BAD_REQUEST),
+    SCHEDULE_NOT_CANCELLED("SCHEDULE_NOT_CANCELLED", "해당 스케줄은 결원 상태가 아닙니다.", HttpStatus.BAD_REQUEST),
+    SCHEDULE_IN_PAST("SCHEDULE_IN_PAST", "과거 스케줄에 대한 교대 요청은 불가능합니다.", HttpStatus.BAD_REQUEST),
+    SWAP_ALREADY_EXISTS("SWAP_ALREADY_EXISTS", "이미 진행 중인 교대 요청이 존재합니다.", HttpStatus.CONFLICT);
+
+    private final String code;
+    private final String message;
+    private final HttpStatus httpStatus;
+}

@@ -1,19 +1,38 @@
 package com.mmgon.jjajuka.domain.swap.service;
 
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
+import com.mmgon.jjajuka.domain.notification.service.NotificationService;
+import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
+import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
+import com.mmgon.jjajuka.domain.swap.controller.request.SwapCreateRequest;
+import com.mmgon.jjajuka.domain.swap.controller.response.SwapCreateResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
+import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
+import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
+import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
+import com.mmgon.jjajuka.global.enums.ScheduleStatus;
+import com.mmgon.jjajuka.global.enums.SwapStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class SwapService {
 
     private final SwapRepository swapRepository;
+    private final MemberRepository memberRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final NotificationService notificationService;
+    private final DiscordNotificationService discordNotificationService;
 
     public List<Swap> findAll() {
         return swapRepository.findAll();
@@ -22,5 +41,45 @@ public class SwapService {
     public Swap findById(Integer id) {
         return swapRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Swap not found: " + id));
+    }
+
+    @Transactional
+    public SwapCreateResponse createSwapRequest(SwapCreateRequest request) {
+        Member target = memberRepository.findById(request.getTargetMemberId())
+                .orElseThrow(() -> new SwapException(SwapErrorCode.TARGET_MEMBER_NOT_FOUND));
+
+        Schedule requesterSchedule = scheduleRepository.findById(request.getScheduleId())
+                .orElseThrow(() -> new SwapException(SwapErrorCode.SCHEDULE_NOT_FOUND));
+
+        if (requesterSchedule.getStatus() != ScheduleStatus.CANCLED) {
+            throw new SwapException(SwapErrorCode.SCHEDULE_NOT_CANCELLED);
+        }
+
+        if (requesterSchedule.getWorkDate().isBefore(LocalDate.now())) {
+            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
+        }
+
+        swapRepository.findByRequesterScheduleIdAndStatus(request.getScheduleId(), SwapStatus.PENDING)
+                .ifPresent(existingSwap -> {
+                    throw new SwapException(SwapErrorCode.SWAP_ALREADY_EXISTS);
+                });
+
+        Member requester = requesterSchedule.getMember();
+
+        if (requester.getId().equals(target.getId())) {
+            throw new SwapException(SwapErrorCode.CANNOT_SWAP_WITH_SELF);
+        }
+
+        Swap swap = Swap.createSwapRequest(requester, target, requesterSchedule);
+        Swap savedSwap = swapRepository.save(swap);
+
+        try {
+            DiscordWebhookRequest message = discordNotificationService.sendSwapRequestNotification(savedSwap);
+            notificationService.createSwapNotification(savedSwap, message);
+        } catch (Exception e) {
+            log.error("Failed to send Discord notification, but swap was created successfully", e);
+        }
+
+        return SwapCreateResponse.success();
     }
 }
