@@ -11,6 +11,7 @@ import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
+import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.SwapStatus;
 import lombok.RequiredArgsConstructor;
@@ -72,10 +73,9 @@ public class SwapService {
         Swap swap = Swap.createSwapRequest(requester, target, requesterSchedule);
         Swap savedSwap = swapRepository.save(swap);
 
-        notificationService.createSwapNotification(savedSwap);
-
         try {
-            discordNotificationService.sendSwapRequestNotification(savedSwap);
+            DiscordWebhookRequest message = discordNotificationService.sendSwapRequestNotification(savedSwap);
+            notificationService.createSwapNotification(savedSwap, message);
         } catch (Exception e) {
             log.error("Failed to send Discord notification, but swap was created successfully", e);
         }

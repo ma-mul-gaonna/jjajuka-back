@@ -14,26 +14,8 @@ import java.util.List;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DiscordWebhookRequest {
+    private String content;
     private List<DiscordEmbed> embeds;
-    private List<Component> components;
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Component {
-        private Integer type;
-        private List<ActionButton> components;
-    }
-
-    @Getter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ActionButton {
-        private Integer type;
-        private Integer style;
-        private String label;
-        private String url;
-    }
+    private String username;
+    private String avatar_url;
 }
