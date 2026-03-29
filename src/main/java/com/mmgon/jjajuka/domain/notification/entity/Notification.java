@@ -4,6 +4,8 @@ import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.global.enums.NotiType;
 import com.mmgon.jjajuka.global.enums.ReferenceType;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,8 @@ import java.time.LocalDateTime;
 @Table(name = "notification")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Notification {
 
     @Id
