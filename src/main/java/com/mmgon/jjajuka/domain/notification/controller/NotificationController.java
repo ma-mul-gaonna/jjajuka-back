@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.notification.controller;
 
+import com.mmgon.jjajuka.domain.notification.controller.response.NotificationListResponse;
 import com.mmgon.jjajuka.domain.notification.entity.Notification;
 import com.mmgon.jjajuka.domain.notification.service.NotificationService;
 import com.mmgon.jjajuka.domain.swap.service.DiscordNotificationService;
@@ -18,6 +19,14 @@ public class NotificationController {
     private final DiscordNotificationService discordNotificationService;
 
     @GetMapping
+    public ResponseEntity<NotificationListResponse> getNotificationsByReceiverId(
+            @RequestParam Integer receiverId
+    ) {
+        NotificationListResponse response = notificationService.getNotificationsByReceiverId(receiverId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<Notification>> getAll() {
         return ResponseEntity.ok(notificationService.findAll());
     }
