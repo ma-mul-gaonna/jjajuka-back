@@ -1,6 +1,7 @@
 package com.mmgon.jjajuka.domain.notification.controller;
 
 import com.mmgon.jjajuka.domain.notification.controller.response.NotificationListResponse;
+import com.mmgon.jjajuka.domain.notification.controller.response.NotificationReadResponse;
 import com.mmgon.jjajuka.domain.notification.entity.Notification;
 import com.mmgon.jjajuka.domain.notification.service.NotificationService;
 import com.mmgon.jjajuka.domain.swap.service.DiscordNotificationService;
@@ -23,6 +24,23 @@ public class NotificationController {
             @RequestParam Integer receiverId
     ) {
         NotificationListResponse response = notificationService.getNotificationsByReceiverId(receiverId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{notificationId}/read")
+    public ResponseEntity<NotificationReadResponse> markAsRead(
+            @PathVariable Integer notificationId
+    ) {
+        Notification notification = notificationService.markAsRead(notificationId);
+
+        NotificationReadResponse response = NotificationReadResponse.builder()
+                .success(true)
+                .data(NotificationReadResponse.DataWrapper.builder()
+                        .notificationId(notification.getId())
+                        .isRead(notification.getIsRead())
+                        .build())
+                .build();
+
         return ResponseEntity.ok(response);
     }
 

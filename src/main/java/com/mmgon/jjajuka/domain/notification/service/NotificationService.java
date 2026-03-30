@@ -3,6 +3,8 @@ package com.mmgon.jjajuka.domain.notification.service;
 import com.mmgon.jjajuka.domain.notification.dto.NotificationDto;
 import com.mmgon.jjajuka.domain.notification.controller.response.NotificationListResponse;
 import com.mmgon.jjajuka.domain.notification.entity.Notification;
+import com.mmgon.jjajuka.domain.notification.exception.NotificationErrorCode;
+import com.mmgon.jjajuka.domain.notification.exception.NotificationException;
 import com.mmgon.jjajuka.domain.notification.repository.NotificationRepository;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
@@ -50,6 +52,15 @@ public class NotificationService {
                         .unreadCount(unreadCount)
                         .build())
                 .build();
+    }
+
+    @Transactional
+    public Notification markAsRead(Integer notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new NotificationException(NotificationErrorCode.NOTIFICATION_NOT_FOUND));
+
+        notification.markAsRead();
+        return notification;
     }
 
     @Transactional
