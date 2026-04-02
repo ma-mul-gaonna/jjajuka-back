@@ -16,4 +16,13 @@ public class RuleCustom {
 
     @Column(name = "custom_value", length = 255, nullable = false)
     private String customValue;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_rule_id", nullable = false)
+    private ScheduleRule scheduleRule;
+
+    public RuleCustom(String customValue, ScheduleRule scheduleRule) {
+        this.customValue = customValue;
+        this.scheduleRule = scheduleRule;
+    }
 }
