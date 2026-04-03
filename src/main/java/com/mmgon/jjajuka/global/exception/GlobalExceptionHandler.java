@@ -2,6 +2,7 @@ package com.mmgon.jjajuka.global.exception;
 
 import com.mmgon.jjajuka.domain.notification.exception.NotificationException;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
+import com.mmgon.jjajuka.domain.vacancy.exception.VacancyException;
 import com.mmgon.jjajuka.global.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(SwapException.class)
     public ResponseEntity<ErrorResponse> handleSwapException(SwapException e) {
-        log.error("SwapException occurred: {}", e.getMessage());
+        log.error("{} occurred: {}", e.getClass().getSimpleName(), e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getErrorCode().getMessage()
+        );
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(response);
+    }
+
+    @ExceptionHandler(VacancyException.class)
+    public ResponseEntity<ErrorResponse> handleVacancyException(VacancyException e) {
+        log.error("{} occurred: {}", e.getClass().getSimpleName(), e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 e.getErrorCode().getCode(),
                 e.getErrorCode().getMessage()
