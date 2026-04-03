@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.global.exception;
 
+import com.mmgon.jjajuka.domain.notification.exception.NotificationException;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.vacancy.exception.VacancyException;
 import com.mmgon.jjajuka.global.dto.ErrorResponse;
@@ -31,6 +32,18 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(VacancyException.class)
     public ResponseEntity<ErrorResponse> handleVacancyException(VacancyException e) {
         log.error("{} occurred: {}", e.getClass().getSimpleName(), e.getMessage());
+        ErrorResponse response = ErrorResponse.of(
+                e.getErrorCode().getCode(),
+                e.getErrorCode().getMessage()
+        );
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
+                .body(response);
+    }
+
+    @ExceptionHandler(NotificationException.class)
+    public ResponseEntity<ErrorResponse> handleNotificationException(NotificationException e) {
+        log.error("NotificationException occurred: {}", e.getMessage());
         ErrorResponse response = ErrorResponse.of(
                 e.getErrorCode().getCode(),
                 e.getErrorCode().getMessage()
