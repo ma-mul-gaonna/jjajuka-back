@@ -1,24 +1,34 @@
 package com.mmgon.jjajuka.domain.notification.service;
 
+import com.mmgon.jjajuka.domain.member.entity.Member;
+import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import com.mmgon.jjajuka.domain.notification.entity.Notification;
 import com.mmgon.jjajuka.domain.notification.repository.NotificationRepository;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
+import com.mmgon.jjajuka.domain.vacancy.controller.response.VacancyNotificationResponse;
+import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.NotiType;
 import com.mmgon.jjajuka.global.enums.ReferenceType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final MemberRepository memberRepository;
 
     public List<Notification> findAll() {
         return notificationRepository.findAll();
@@ -43,5 +53,33 @@ public class NotificationService {
                 .build();
 
         return notificationRepository.save(notification);
+    }
+
+
+    @Transactional
+    public List<Notification> createVacancyNotificationsForAdmins(Vacancy vacancy, VacancyNotificationResponse notification) {
+        List<Member> admins = memberRepository.findAllByAuthority(Authority.ADMIN);
+
+        if (admins.isEmpty()) {
+            log.warn("No admin members found to send vacancy notification");
+            return new ArrayList<>();
+        }
+        List<Notification> notifications = admins.stream()
+                .map(admin -> Notification.builder()
+                        .receiver(admin)
+                        .title(notification.getTitle())
+                        .message(notification.getMessage())
+                        .referenceType(ReferenceType.VACANCY)
+                        .referenceId(vacancy.getId())
+                        .notiType(NotiType.VACANCY_ALERT)
+                        .isRead(false)
+                        .createdAt(LocalDateTime.now())
+                        .build())
+                .toList();
+
+        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
+        log.info("Created {} vacancy notifications for admins", savedNotifications.size());
+
+        return savedNotifications;
     }
 }
