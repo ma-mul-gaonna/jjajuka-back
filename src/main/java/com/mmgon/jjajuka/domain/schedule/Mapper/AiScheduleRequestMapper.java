@@ -5,6 +5,7 @@ import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.rule.entity.ScheduleRule;
 import com.mmgon.jjajuka.domain.schedule.controller.request.AiScheduleRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.request.InputJson;
+import com.mmgon.jjajuka.domain.schedule.controller.request.ScheduleGenerateRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ public class AiScheduleRequestMapper {
             ScheduleRule rule,
             List<Member> members,
             List<Dayoff> dayoffs,
+            List<ScheduleGenerateRequest.ShiftRequest> shiftRequests,
             List<String> userRequests
     ) {
         YearMonth yearMonth = YearMonth.parse(scheduleYearMonth);
@@ -30,53 +32,13 @@ public class AiScheduleRequestMapper {
                 .map(this::toMemberDto)
                 .toList();
 
-        List<InputJson.ShiftDto> shifts = List.of(
-                InputJson.ShiftDto.builder()
-                        .name("Day")
-                        .startTime("07:00")
-                        .endTime("15:00")
-                        .requiredCount(rule.getRequiredCount())
-                        .requiredRoles(List.of())
-                        .requiredSkills(List.of())
-                        .isNight(false)
-                        .minSkillCoverage(List.of(
-                                InputJson.MinSkillCoverageDto.builder()
-                                        .skill("GRADE_A")
-                                        .count(1)
-                                        .build()
-                        ))
-                        .build(),
-                InputJson.ShiftDto.builder()
-                        .name("Evening")
-                        .startTime("15:00")
-                        .endTime("23:00")
-                        .requiredCount(rule.getRequiredCount())
-                        .requiredRoles(List.of())
-                        .requiredSkills(List.of())
-                        .isNight(false)
-                        .minSkillCoverage(List.of(
-                                InputJson.MinSkillCoverageDto.builder()
-                                        .skill("GRADE_A")
-                                        .count(1)
-                                        .build()
-                        ))
-                        .build(),
-                InputJson.ShiftDto.builder()
-                        .name("Night")
-                        .startTime("23:00")
-                        .endTime("07:00")
-                        .requiredCount(rule.getRequiredCount())
-                        .requiredRoles(List.of())
-                        .requiredSkills(List.of())
-                        .isNight(true)
-                        .minSkillCoverage(List.of(
-                                InputJson.MinSkillCoverageDto.builder()
-                                        .skill("GRADE_A")
-                                        .count(1)
-                                        .build()
-                        ))
-                        .build()
-        );
+        if (shiftRequests == null || shiftRequests.isEmpty()) {
+            throw new IllegalArgumentException("시프트 정보는 필수입니다.");
+        }
+
+        List<InputJson.ShiftDto> shifts = shiftRequests.stream()
+                .map(this::toShiftDto)
+                .toList();
 
         List<String> mergedUserRequests = new ArrayList<>();
         if (userRequests != null) {
@@ -115,16 +77,59 @@ public class AiScheduleRequestMapper {
         List<String> roles = List.of("nurse");
 
         List<String> skills = new ArrayList<>();
-        if (member.getPosition() != null) {
-            skills.add("GRADE_" + member.getSkills().name());
+        if (member.getSkills() != null) {
+            skills.add(member.getSkills().name());
         }
+
+        List<String> preferredShifts = member.getPreferredShifts() != null
+                ? List.of(convertShiftName(member.getPreferredShifts().name()))
+                : List.of();
 
         return InputJson.MemberDto.builder()
                 .userId(member.getId())
                 .userName(member.getName())
                 .roles(roles)
                 .skills(skills)
-                .preferredShifts(List.of())
+                .preferredShifts(preferredShifts)
+                .build();
+    }
+
+    private String convertShiftName(String shiftName) {
+        return switch (shiftName) {
+            case "DAY" -> "Day";
+            case "EVENING" -> "Evening";
+            case "NIGHT" -> "Night";
+            default -> shiftName;
+        };
+    }
+
+    private InputJson.ShiftDto toShiftDto(ScheduleGenerateRequest.ShiftRequest shiftRequest) {
+        return InputJson.ShiftDto.builder()
+                .name(convertShiftName(shiftRequest.getName()))
+                .startTime(shiftRequest.getStartTime())
+                .endTime(shiftRequest.getEndTime())
+                .requiredCount(shiftRequest.getRequiredCount())
+                .requiredRoles(
+                        shiftRequest.getRequiredRoles() != null
+                                ? shiftRequest.getRequiredRoles()
+                                : List.of()
+                )
+                .requiredSkills(
+                        shiftRequest.getRequiredSkills() != null
+                                ? shiftRequest.getRequiredSkills()
+                                : List.of()
+                )
+                .isNight(shiftRequest.isNight())
+                .minSkillCoverage(
+                        shiftRequest.getMinSkillCoverage() != null
+                                ? shiftRequest.getMinSkillCoverage().stream()
+                                .map(msc -> InputJson.MinSkillCoverageDto.builder()
+                                        .skill(msc.getSkill())
+                                        .count(msc.getCount())
+                                        .build())
+                                .toList()
+                                : List.of()
+                )
                 .build();
     }
 }
