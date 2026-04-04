@@ -45,6 +45,24 @@ public class ReplacementRecommendationService {
     @Value("${ai.base-url}")
     private String aiBaseUrl;
 
+    public List<RecommendationResponse> exist() {
+        List<Vacancy> pendingVacancies = vacancyRepository.findAllByStatus(VacancyStatus.PENDING);
+
+        List<RecommendationResponse> responses = pendingVacancies.stream()
+                .map(vacancy -> {
+                    boolean exists = candidateRepository.existsByVacancyId(vacancy.getId());
+
+                    if (exists) {
+                        return createResponseFromExistingCandidates(vacancy);
+                    } else {
+                        return null;
+                    }
+                })
+                .toList();
+
+        return responses;
+    }
+
     public List<RecommendationResponse> recommend() {
 
         List<Vacancy> pendingVacancies = vacancyRepository.findAllByStatus(VacancyStatus.PENDING);
@@ -63,6 +81,27 @@ public class ReplacementRecommendationService {
                 .toList();
     }
 
+    private RecommendationResponse createResponseFromExistingCandidates(Vacancy vacancy) {
+
+        List<ReplacementCandidate> candidates = candidateRepository.findByVacancyIdOrderByCandidateRankAsc(vacancy.getId());
+
+        List<RecommendationResponse.RecommendationDto> recommendationDtos =
+                candidates.stream()
+                        .map(c -> RecommendationResponse.RecommendationDto.builder()
+                                .userId(c.getCandidateMember().getId().longValue())
+                                .rank(c.getCandidateRank())
+                                .reasons(c.getReason())
+                                .build())
+                        .toList();
+
+        return RecommendationResponse.builder()
+                .vacancyId(vacancy.getId())
+                .scheduleId(vacancy.getSchedule().getId())
+                .vacancyMemberName(vacancy.getMember().getName())
+                .recommendations(recommendationDtos)
+                .build();
+    }
+
     private RecommendationResponse recommendForVacancy(
             Vacancy vacancy,
             List<Member> members,
@@ -70,12 +109,6 @@ public class ReplacementRecommendationService {
             List<RuleCustom> ruleCustom,
             String url
     ) {
-        boolean exists = candidateRepository.existsByVacancyId(vacancy.getId());
-
-        if (exists) {
-            return createResponseFromExistingCandidates(vacancy);
-        }
-
         Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
         List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
 
@@ -120,27 +153,6 @@ public class ReplacementRecommendationService {
         result.setScheduleId(vacancy.getSchedule().getId());
         result.setVacancyMemberName(vacancy.getMember().getName());
         return result;
-    }
-
-    private RecommendationResponse createResponseFromExistingCandidates(Vacancy vacancy) {
-
-        List<ReplacementCandidate> candidates = candidateRepository.findByVacancyIdOrderByCandidateRankAsc(vacancy.getId());
-
-        List<RecommendationResponse.RecommendationDto> recommendationDtos =
-                candidates.stream()
-                        .map(c -> RecommendationResponse.RecommendationDto.builder()
-                                .userId(c.getCandidateMember().getId().longValue())
-                                .rank(c.getCandidateRank())
-                                .reasons(c.getReason())
-                                .build())
-                        .toList();
-
-        return RecommendationResponse.builder()
-                .vacancyId(vacancy.getId())
-                .scheduleId(vacancy.getSchedule().getId())
-                .vacancyMemberName(vacancy.getMember().getName())
-                .recommendations(recommendationDtos)
-                .build();
     }
 
     private AIRecommendationRequest createAiRequest(

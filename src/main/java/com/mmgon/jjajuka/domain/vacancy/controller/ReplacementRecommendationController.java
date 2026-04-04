@@ -24,4 +24,14 @@ public class ReplacementRecommendationController {
 
         return ResponseEntity.ok(responses);
     }
+
+    @GetMapping("/exist")
+    public ResponseEntity<List<RecommendationResponse>> exist() {
+
+        List<RecommendationResponse> responses = recommendationService.exist();
+
+        return ResponseEntity.ok(responses);
+    }
+
+
 }
