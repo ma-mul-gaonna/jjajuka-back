@@ -24,4 +24,10 @@ public class RuleCustomController {
     public ResponseEntity<RuleCustom> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(ruleCustomService.findById(id));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        ruleCustomService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }
