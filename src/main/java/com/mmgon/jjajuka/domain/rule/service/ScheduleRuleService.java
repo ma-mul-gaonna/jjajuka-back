@@ -2,6 +2,7 @@ package com.mmgon.jjajuka.domain.rule.service;
 
 import com.mmgon.jjajuka.domain.rule.dto.ScheduleRuleDto;
 import com.mmgon.jjajuka.domain.rule.entity.ScheduleRule;
+import com.mmgon.jjajuka.domain.rule.repository.RuleCustomRepository;
 import com.mmgon.jjajuka.domain.rule.repository.ScheduleRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 public class ScheduleRuleService {
 
     private final ScheduleRuleRepository scheduleRuleRepository;
+    private final RuleCustomRepository ruleCustomRepository;
 
     public List<ScheduleRuleDto.Response> getAll() {
         return scheduleRuleRepository.findAll().stream()
@@ -29,6 +31,8 @@ public class ScheduleRuleService {
     @Transactional
     public ScheduleRuleDto.Response create(ScheduleRuleDto.Request request) {
         validate(request);
+        ruleCustomRepository.deleteAll();
+        ruleCustomRepository.flush();
         scheduleRuleRepository.deleteAll();
         scheduleRuleRepository.flush();
         ScheduleRule scheduleRule = request.toEntity();
