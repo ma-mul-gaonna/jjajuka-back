@@ -18,6 +18,7 @@ import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.DayoffStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -35,11 +36,12 @@ public class ScheduleGenerationFacade {
     private final ScheduleService scheduleService;
     private final AiScheduleRequestMapper aiScheduleRequestMapper;
 
+    @Transactional
     public ScheduleResponse generateWithRules(ScheduleGenerateRequest request) {
         // 1. 규칙 저장
         ScheduleRuleDto.Response savedRuleDto = scheduleRuleService.create(request.getRule());
 
-        ScheduleRule savedRule = scheduleRuleRepository.findById(savedRuleDto.id())
+        ScheduleRule savedRule = scheduleRuleRepository.findWithRuleCustomsById(savedRuleDto.id())
                 .orElseThrow(() -> new IllegalArgumentException("저장된 규칙을 찾을 수 없습니다."));
 
         // 2. 사원 조회
