@@ -5,11 +5,11 @@ import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import com.mmgon.jjajuka.domain.notification.service.NotificationService;
 import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
-import com.mmgon.jjajuka.domain.swap.controller.request.SwapCreateRequest;
-import com.mmgon.jjajuka.domain.swap.controller.request.SwapDecisionRequest;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapCreateResponse;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapDecisionResponse;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapResponse;
+import com.mmgon.jjajuka.domain.swap.dto.request.SwapCreateRequest;
+import com.mmgon.jjajuka.domain.swap.dto.request.SwapDecisionRequest;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapCreateResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapDecisionResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -84,6 +84,13 @@ public class SwapService {
         }
 
         return SwapCreateResponse.success();
+    }
+
+    public List<SwapResponse> getReceivedSwaps(Integer loginMemberId) {
+        return swapRepository.findReceivedSwapsByMemberId(loginMemberId)
+                .stream()
+                .map(SwapResponse::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)

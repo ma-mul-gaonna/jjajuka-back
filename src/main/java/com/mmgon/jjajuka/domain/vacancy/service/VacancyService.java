@@ -63,6 +63,21 @@ public class VacancyService {
         return VacancyDto.from(saved);
     }
 
+    public VacancyListResponse getMyVacancies(Integer memberId) {
+        List<Vacancy> vacancies = vacancyRepository.findAllByMemberId(memberId);
+
+        List<VacancyDto> vacancyDtos = vacancies.stream()
+                .map(VacancyDto::from)
+                .toList();
+
+        return VacancyListResponse.builder()
+                .success(true)
+                .data(VacancyListResponse.DataWrapper.builder()
+                        .vacancies(vacancyDtos)
+                        .build())
+                .build();
+    }
+
     public VacancyListResponse getAllVacancies() {
         List<Vacancy> vacancies = vacancyRepository.findAllWithMemberAndSchedule();
 

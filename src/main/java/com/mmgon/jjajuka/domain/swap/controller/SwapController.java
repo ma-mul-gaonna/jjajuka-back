@@ -1,11 +1,11 @@
 package com.mmgon.jjajuka.domain.swap.controller;
 
 import com.mmgon.jjajuka.domain.auth.dto.LoginResponse;
-import com.mmgon.jjajuka.domain.swap.controller.request.SwapCreateRequest;
-import com.mmgon.jjajuka.domain.swap.controller.request.SwapDecisionRequest;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapCreateResponse;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapDecisionResponse;
-import com.mmgon.jjajuka.domain.swap.controller.response.SwapResponse;
+import com.mmgon.jjajuka.domain.swap.dto.request.SwapCreateRequest;
+import com.mmgon.jjajuka.domain.swap.dto.request.SwapDecisionRequest;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapCreateResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapDecisionResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -50,6 +50,15 @@ public class SwapController {
 
         SwapCreateResponse response = swapService.createSwapRequest(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/shift-swap/received")
+    public ResponseEntity<List<SwapResponse>> getReceivedSwaps(HttpSession session) {
+        LoginResponse loginMember = (LoginResponse) session.getAttribute(SESSION_MEMBER_KEY);
+        if (loginMember == null) {
+            throw new SwapException(SwapErrorCode.UNAUTHORIZED);
+        }
+        return ResponseEntity.ok(swapService.getReceivedSwaps(loginMember.getId()));
     }
 
     @GetMapping("/shift-swap/received/{swapId}")

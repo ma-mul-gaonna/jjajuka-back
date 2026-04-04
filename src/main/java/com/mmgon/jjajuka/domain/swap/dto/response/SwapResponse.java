@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.swap.controller.response;
+package com.mmgon.jjajuka.domain.swap.dto.response;
 
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.schedule.entity.Schedule;

@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.swap.controller.response;
+package com.mmgon.jjajuka.domain.swap.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

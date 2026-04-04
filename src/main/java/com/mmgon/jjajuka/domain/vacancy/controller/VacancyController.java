@@ -39,6 +39,16 @@ public class VacancyController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<VacancyListResponse> getMyVacancies(HttpSession session) {
+        LoginResponse loginMember = (LoginResponse) session.getAttribute(SESSION_MEMBER_KEY);
+        if (loginMember == null) {
+            throw new VacancyException(VacancyErrorCode.UNAUTHORIZED);
+        }
+        VacancyListResponse response = vacancyService.getMyVacancies(loginMember.getId());
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Vacancy> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(vacancyService.findById(id));
