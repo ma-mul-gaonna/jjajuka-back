@@ -82,7 +82,7 @@ public class SwapService {
 
         try {
             DiscordWebhookRequest message = discordNotificationService.sendSwapRequestNotification(savedSwap);
-            notificationService.createSwapNotification(savedSwap, message);
+            //notificationService.createSwapNotification(savedSwap, message);
         } catch (Exception e) {
             log.error("Failed to send Discord notification, but swap was created successfully", e);
         }
