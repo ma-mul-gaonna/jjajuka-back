@@ -3,7 +3,9 @@ package com.mmgon.jjajuka.domain.swap.repository;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.global.enums.SwapStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,4 +27,10 @@ public interface SwapRepository extends JpaRepository<Swap, Integer> {
             Integer requesterScheduleGroupId,
             Integer targetScheduleGroupId
     );
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Swap s " +
+            "WHERE s.requesterSchedule.scheduleGroup.id = :scheduleGroupId " +
+            "   OR s.targetSchedule.scheduleGroup.id = :scheduleGroupId")
+    void deleteAllByScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
 }
