@@ -28,7 +28,8 @@ public class AiScheduleRequestMapper {
             List<Member> members,
             List<Dayoff> dayoffs,
             List<ScheduleGenerateRequest.ShiftRequest> shiftRequests,
-            List<String> userRequests
+            List<String> userRequests,
+            List<String> ruleCustomValues
     ) {
         YearMonth yearMonth = YearMonth.parse(scheduleYearMonth);
         LocalDate startDate = yearMonth.atDay(1);
@@ -54,9 +55,9 @@ public class AiScheduleRequestMapper {
             mergedUserRequests.add(dayoff.getMember().getName() + "는 " + dayoff.getDate() + " 쉬게 해줘");
         }
 
-        rule.getRuleCustoms().forEach(custom ->
-                mergedUserRequests.add(custom.getCustomValue())
-        );
+        if (ruleCustomValues != null) {
+            mergedUserRequests.addAll(ruleCustomValues);
+        }
 
         InputJson inputJson = InputJson.builder()
                 .startDate(startDate.toString())
