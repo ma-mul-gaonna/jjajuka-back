@@ -26,7 +26,7 @@ public record MemberResponse(
                 member.getPhoneNumber(),
                 member.getHireDate(),
                 member.getEmploymentStatus(),
-                member.getSkill()
+                member.getSkills()
         );
     }
 }
