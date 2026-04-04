@@ -29,6 +29,11 @@ public class MemberService {
     }
 
     @Transactional
+    public void delete(Integer id) {
+        memberRepository.delete(findById(id));
+    }
+
+    @Transactional
     public MemberResponse create(MemberCreateRequest request) {
         if (memberRepository.findByLoginId(request.loginId()).isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다: " + request.loginId());
