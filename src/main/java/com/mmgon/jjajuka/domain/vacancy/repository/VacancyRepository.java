@@ -13,4 +13,11 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
             "JOIN FETCH v.schedule " +
             "ORDER BY v.createdAt DESC")
     List<Vacancy> findAllWithMemberAndSchedule();
+
+    @Query("SELECT v FROM Vacancy v " +
+            "JOIN FETCH v.member " +
+            "JOIN FETCH v.schedule " +
+            "WHERE v.member.id = :memberId " +
+            "ORDER BY v.createdAt DESC")
+    List<Vacancy> findAllByMemberId(Integer memberId);
 }

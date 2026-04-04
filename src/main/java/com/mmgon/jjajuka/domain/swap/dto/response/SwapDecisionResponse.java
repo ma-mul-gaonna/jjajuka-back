@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.swap.controller.response;
+package com.mmgon.jjajuka.domain.swap.dto.response;
 
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.global.enums.SwapStatus;

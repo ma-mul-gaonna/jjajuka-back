@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.swap.controller.request;
+package com.mmgon.jjajuka.domain.swap.dto.request;
 
 import com.mmgon.jjajuka.global.enums.SwapStatus;
 import jakarta.validation.constraints.NotNull;
