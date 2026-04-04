@@ -5,8 +5,8 @@ import com.mmgon.jjajuka.global.enums.SwapStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface SwapRepository extends JpaRepository<Swap, Integer> {
@@ -21,4 +21,8 @@ public interface SwapRepository extends JpaRepository<Swap, Integer> {
 
     int countByStatusAndCreatedAtGreaterThanEqualAndCreatedAtLessThan(SwapStatus status, LocalDate start, LocalDate end);
 
+    boolean existsByRequesterSchedule_ScheduleGroup_IdOrTargetSchedule_ScheduleGroup_Id(
+            Integer requesterScheduleGroupId,
+            Integer targetScheduleGroupId
+    );
 }

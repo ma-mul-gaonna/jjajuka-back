@@ -8,6 +8,8 @@ import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.domain.schedule.entity.ScheduleGroup;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleGroupRepository;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
+import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
+import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.ScheduleType;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
     private final ScheduleGroupRepository scheduleGroupRepository;
+    private final VacancyRepository vacancyRepository;
+    private final SwapRepository swapRepository;
 
     public List<Schedule> findAll() {
         return scheduleRepository.findAll();
@@ -44,16 +48,26 @@ public class ScheduleService {
         LocalDate startDate = yearMonth.atDay(1);
         LocalDate endDate = yearMonth.atEndOfMonth();
         return scheduleRepository.findByMemberIdAndWorkDateBetweenOrderByWorkDate(memberId, startDate, endDate);
-  }
+    }
+
     @Transactional
     public Integer saveGeneratedSchedules(
             String scheduleYearMonth,
             String reason,
             AiScheduleResponse aiScheduleResponse
     ) {
-        ScheduleGroup scheduleGroup = scheduleGroupRepository.save(
-                ScheduleGroup.create(scheduleYearMonth, reason)
-        );
+        validateAssignments(aiScheduleResponse);
+
+        ScheduleGroup scheduleGroup = scheduleGroupRepository
+                .findTopByScheduleYearMonthOrderByIdDesc(scheduleYearMonth)
+                .orElseGet(() -> scheduleGroupRepository.save(
+                        ScheduleGroup.create(scheduleYearMonth, reason)
+                ));
+
+        validateReplaceAvailable(scheduleGroup.getId());
+
+        scheduleGroup.updateReason(reason);
+        scheduleRepository.deleteByScheduleGroupId(scheduleGroup.getId());
 
         List<Schedule> schedules = aiScheduleResponse.getAssignments().stream()
                 .map(assignment -> {
@@ -131,6 +145,24 @@ public class ScheduleService {
                 .build();
     }
 
+    private void validateAssignments(AiScheduleResponse aiScheduleResponse) {
+        if (aiScheduleResponse == null || aiScheduleResponse.getAssignments() == null || aiScheduleResponse.getAssignments().isEmpty()) {
+            throw new IllegalArgumentException("AI가 생성한 근무표 데이터가 비어 있습니다.");
+        }
+    }
+
+    private void validateReplaceAvailable(Integer scheduleGroupId) {
+        boolean hasVacancy = vacancyRepository.existsBySchedule_ScheduleGroup_Id(scheduleGroupId);
+        boolean hasSwap = swapRepository.existsByRequesterSchedule_ScheduleGroup_IdOrTargetSchedule_ScheduleGroup_Id(
+                scheduleGroupId,
+                scheduleGroupId
+        );
+
+        if (hasVacancy || hasSwap) {
+            throw new IllegalArgumentException("이미 결원 신청 또는 교대 요청이 존재하는 근무표는 재생성할 수 없습니다.");
+        }
+    }
+
     private boolean isVisibleSchedule(Schedule schedule) {
         return schedule.getStatus() != ScheduleStatus.CANCELED
                 && schedule.getStatus() != ScheduleStatus.SWAPPED;
@@ -167,10 +199,14 @@ public class ScheduleService {
     }
 
     private ScheduleType toScheduleType(String shiftName) {
-        return switch (shiftName) {
-            case "Day" -> ScheduleType.DAY;
-            case "Evening" -> ScheduleType.EVENING;
-            case "Night" -> ScheduleType.NIGHT;
+        if (shiftName == null) {
+            throw new IllegalArgumentException("shiftName 이 null 입니다.");
+        }
+
+        return switch (shiftName.trim().toUpperCase()) {
+            case "DAY" -> ScheduleType.DAY;
+            case "EVENING" -> ScheduleType.EVENING;
+            case "NIGHT" -> ScheduleType.NIGHT;
             default -> throw new IllegalArgumentException("지원하지 않는 shiftName 입니다: " + shiftName);
         };
     }

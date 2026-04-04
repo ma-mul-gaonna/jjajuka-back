@@ -25,4 +25,5 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
 
     int countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDate start, LocalDate end);
 
+    boolean existsBySchedule_ScheduleGroup_Id(Integer scheduleGroupId);
 }

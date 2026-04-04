@@ -33,4 +33,8 @@ public class ScheduleGroup {
                 .reason(reason)
                 .build();
     }
+
+    public void updateReason(String reason) {
+        this.reason = reason;
+    }
 }
