@@ -164,7 +164,7 @@ public class ReplacementRecommendationService {
     private List<AIRecommendationRequest.ShiftDto> createShifts() {
         return List.of(
                 AIRecommendationRequest.ShiftDto.builder()
-                        .name("Day")
+                        .name("DAY")
                         .startTime("07:00")
                         .endTime("15:00")
                         .requiredCount(2)
@@ -176,7 +176,7 @@ public class ReplacementRecommendationService {
                         ))
                         .build(),
                 AIRecommendationRequest.ShiftDto.builder()
-                        .name("Evening")
+                        .name("EVENING")
                         .startTime("15:00")
                         .endTime("23:00")
                         .requiredCount(2)
@@ -188,7 +188,7 @@ public class ReplacementRecommendationService {
                         ))
                         .build(),
                 AIRecommendationRequest.ShiftDto.builder()
-                        .name("Night")
+                        .name("NIGHT")
                         .startTime("23:00")
                         .endTime("07:00")
                         .requiredCount(2)
