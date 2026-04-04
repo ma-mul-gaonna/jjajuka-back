@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -74,21 +76,16 @@ public class ScheduleService {
         scheduleGroup.updateReason(reason);
         scheduleRepository.deleteByScheduleGroupId(scheduleGroup.getId());
 
-        List<Schedule> schedules = aiScheduleResponse.getAssignments().stream()
-                .map(assignment -> {
-                    Member member = memberRepository.findById(assignment.getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException(
-                                    "해당 회원이 존재하지 않습니다. memberId=" + assignment.getUserId()
-                            ));
+        Map<Integer, Member> memberMap = loadMemberMap(aiScheduleResponse);
 
-                    return Schedule.create(
-                            scheduleGroup,
-                            member,
-                            LocalDate.parse(assignment.getDate()),
-                            toScheduleType(assignment.getShiftName()),
-                            ScheduleStatus.ACTIVE
-                    );
-                })
+        List<Schedule> schedules = aiScheduleResponse.getAssignments().stream()
+                .map(assignment -> Schedule.create(
+                        scheduleGroup,
+                        memberMap.get(assignment.getUserId()),
+                        LocalDate.parse(assignment.getDate()),
+                        toScheduleType(assignment.getShiftName()),
+                        ScheduleStatus.ACTIVE
+                ))
                 .toList();
 
         scheduleRepository.saveAll(schedules);
@@ -151,9 +148,42 @@ public class ScheduleService {
     }
 
     private void validateAssignments(AiScheduleResponse aiScheduleResponse) {
-        if (aiScheduleResponse == null || aiScheduleResponse.getAssignments() == null || aiScheduleResponse.getAssignments().isEmpty()) {
+        if (aiScheduleResponse == null) {
+            throw new IllegalArgumentException("AI 응답이 비어 있습니다.");
+        }
+
+        if (aiScheduleResponse.getAssignments() == null || aiScheduleResponse.getAssignments().isEmpty()) {
             throw new IllegalArgumentException("AI가 생성한 근무표 데이터가 비어 있습니다.");
         }
+
+        boolean hasInvalidAssignment = aiScheduleResponse.getAssignments().stream()
+                .anyMatch(assignment -> assignment.getUserId() == null
+                        || assignment.getDate() == null
+                        || assignment.getShiftName() == null);
+
+        if (hasInvalidAssignment) {
+            throw new IllegalArgumentException("AI 응답 assignments 에 userId/date/shiftName 누락 데이터가 있습니다.");
+        }
+    }
+
+    private Map<Integer, Member> loadMemberMap(AiScheduleResponse aiScheduleResponse) {
+        Set<Integer> memberIds = aiScheduleResponse.getAssignments().stream()
+                .map(AiScheduleResponse.Assignment::getUserId)
+                .collect(Collectors.toSet());
+
+        Map<Integer, Member> memberMap = memberRepository.findAllById(memberIds).stream()
+                .collect(Collectors.toMap(Member::getId, Function.identity()));
+
+        List<Integer> missingMemberIds = memberIds.stream()
+                .filter(memberId -> !memberMap.containsKey(memberId))
+                .sorted()
+                .toList();
+
+        if (!missingMemberIds.isEmpty()) {
+            throw new IllegalArgumentException("AI 응답에 DB에 없는 memberId가 포함되어 있습니다: " + missingMemberIds);
+        }
+
+        return memberMap;
     }
 
     private void deleteRelatedSchedulesData(Integer scheduleGroupId) {
@@ -202,11 +232,15 @@ public class ScheduleService {
             throw new IllegalArgumentException("shiftName 이 null 입니다.");
         }
 
-        return switch (shiftName.trim().toUpperCase()) {
+        return switch (normalizeShiftName(shiftName)) {
             case "DAY" -> ScheduleType.DAY;
             case "EVENING" -> ScheduleType.EVENING;
             case "NIGHT" -> ScheduleType.NIGHT;
             default -> throw new IllegalArgumentException("지원하지 않는 shiftName 입니다: " + shiftName);
         };
+    }
+
+    private String normalizeShiftName(String shiftName) {
+        return shiftName.trim().toUpperCase();
     }
 }
