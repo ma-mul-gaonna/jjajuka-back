@@ -13,6 +13,7 @@ import com.mmgon.jjajuka.domain.schedule.controller.request.AiScheduleRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.request.ScheduleGenerateRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.response.AiScheduleResponse;
 import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleGenerateResponse;
+import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleResponse;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.DayoffStatus;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class ScheduleGenerationFacade {
     private final ScheduleService scheduleService;
     private final AiScheduleRequestMapper aiScheduleRequestMapper;
 
-    public ScheduleGenerateResponse generateWithRules(ScheduleGenerateRequest request) {
+    public ScheduleResponse generateWithRules(ScheduleGenerateRequest request) {
         // 1. 규칙 저장
         ScheduleRuleDto.Response savedRuleDto = scheduleRuleService.create(request.getRule());
 
@@ -72,12 +73,7 @@ public class ScheduleGenerationFacade {
                 aiResponse
         );
 
-        // 7. 응답
-        return ScheduleGenerateResponse.builder()
-                .ruleId(savedRuleDto.id())
-                .scheduleGroupId(scheduleGroupId)
-                .scheduleYearMonth(request.getScheduleYearMonth())
-                .message("근무표 규칙 저장 및 AI 근무표 생성이 완료되었습니다.")
-                .build();
+        // 7. 저장된 결과를 프론트 조회 형식으로 반환
+        return scheduleService.getSchedules(scheduleGroupId);
     }
 }
