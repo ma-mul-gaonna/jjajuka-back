@@ -23,17 +23,19 @@ public class ScheduleRuleDto {
         }
     }
 
+    public record CustomValueDto(Integer id, String value) {}
+
     public record Response(
             Integer id,
             int minRestHours,
             int maxConsecutiveDays,
             int maxShiftsPerDay,
             int requiredCount,
-            List<String> customValues
+            List<CustomValueDto> customValues
     ) {
         public static Response from(ScheduleRule scheduleRule) {
-            List<String> customValues = scheduleRule.getRuleCustoms().stream()
-                    .map(rc -> rc.getCustomValue())
+            List<CustomValueDto> customValues = scheduleRule.getRuleCustoms().stream()
+                    .map(rc -> new CustomValueDto(rc.getId(), rc.getCustomValue()))
                     .toList();
             return new Response(
                     scheduleRule.getId(),

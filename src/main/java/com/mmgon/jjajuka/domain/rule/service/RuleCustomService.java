@@ -23,4 +23,11 @@ public class RuleCustomService {
         return ruleCustomRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("RuleCustom not found: " + id));
     }
+
+    @Transactional
+    public void delete(Integer id) {
+        RuleCustom ruleCustom = ruleCustomRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("RuleCustom not found: " + id));
+        ruleCustomRepository.delete(ruleCustom);
+    }
 }
