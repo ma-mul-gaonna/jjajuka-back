@@ -47,7 +47,7 @@ public class Member {
     private EmploymentStatus employmentStatus;
 
     @Enumerated(EnumType.STRING)
-    @Column
+    @Column(name = "skills")
     private Skills skills;
 
     @Enumerated(EnumType.STRING)
