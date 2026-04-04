@@ -6,7 +6,10 @@ import com.mmgon.jjajuka.domain.notification.service.NotificationService;
 import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
 import com.mmgon.jjajuka.domain.swap.controller.request.SwapCreateRequest;
+import com.mmgon.jjajuka.domain.swap.controller.request.SwapDecisionRequest;
 import com.mmgon.jjajuka.domain.swap.controller.response.SwapCreateResponse;
+import com.mmgon.jjajuka.domain.swap.controller.response.SwapDecisionResponse;
+import com.mmgon.jjajuka.domain.swap.controller.response.SwapResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -51,7 +54,7 @@ public class SwapService {
         Schedule requesterSchedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new SwapException(SwapErrorCode.SCHEDULE_NOT_FOUND));
 
-        if (requesterSchedule.getStatus() != ScheduleStatus.CANCLED) {
+        if (requesterSchedule.getStatus() != ScheduleStatus.CANCELED) {
             throw new SwapException(SwapErrorCode.SCHEDULE_NOT_CANCELLED);
         }
 
@@ -81,5 +84,67 @@ public class SwapService {
         }
 
         return SwapCreateResponse.success();
+    }
+
+    @Transactional(readOnly = true)
+    public SwapResponse getReceivedSwap(Integer swapId, Integer loginMemberId) {
+        Swap swap = swapRepository.findById(swapId)
+                .orElseThrow(() -> new SwapException(SwapErrorCode.SWAP_NOT_FOUND));
+
+        if (!swap.getTarget().getId().equals(loginMemberId)) {
+            throw new SwapException(SwapErrorCode.UNAUTHORIZED);
+        }
+
+        return SwapResponse.from(swap);
+    }
+
+    @Transactional
+    public SwapDecisionResponse respondToSwap(
+            Integer swapId,
+            Integer loginMemberId,
+            SwapDecisionRequest request
+    ) {
+        Swap swap = swapRepository.findById(swapId)
+                .orElseThrow(() -> new SwapException(SwapErrorCode.SWAP_NOT_FOUND));
+
+        if (!swap.getTarget().getId().equals(loginMemberId)) {
+            throw new SwapException(SwapErrorCode.UNAUTHORIZED);
+        }
+
+        if (swap.getStatus() != SwapStatus.PENDING) {
+            throw new SwapException(SwapErrorCode.SWAP_ALREADY_PROCESSED);
+        }
+
+        if (request.getSwapStatus() == SwapStatus.PENDING) {
+            throw new SwapException(SwapErrorCode.INVALID_SWAP_STATUS);
+        }
+
+        if (request.getSwapStatus() == SwapStatus.REJECTED) {
+            swap.reject();
+            return SwapDecisionResponse.from(swap);
+        }
+
+        if (request.getTargetScheduleId() == null) {
+            throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_REQUIRED);
+        }
+
+        Schedule targetSchedule = scheduleRepository.findById(request.getTargetScheduleId())
+                .orElseThrow(() -> new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_FOUND));
+
+        if (!targetSchedule.getMember().getId().equals(loginMemberId)) {
+            throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_BELONG_TO_TARGET);
+        }
+
+        if (targetSchedule.getWorkDate().isBefore(LocalDate.now())) {
+            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
+        }
+
+        if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        swap.accept(targetSchedule);
+
+        return SwapDecisionResponse.from(swap);
     }
 }

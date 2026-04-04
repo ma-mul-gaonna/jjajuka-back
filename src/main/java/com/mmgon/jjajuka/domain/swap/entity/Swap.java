@@ -56,4 +56,14 @@ public class Swap {
                 .createdAt(LocalDate.now())
                 .build();
     }
+
+    public void accept(Schedule targetSchedule) {
+        this.targetSchedule = targetSchedule;
+        this.status = SwapStatus.ACCEPTED;
+    }
+
+    public void reject() {
+        this.targetSchedule = null;
+        this.status = SwapStatus.REJECTED;
+    }
 }
