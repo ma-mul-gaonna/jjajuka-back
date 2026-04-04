@@ -15,6 +15,7 @@ import java.util.List;
 public class RecommendationResponse {
 
     private Integer vacancyId;
+    private Integer scheduleId;
     private String vacancyMemberName;
     private String status;
     private String message;

@@ -17,7 +17,6 @@ import java.util.List;
 public class NotificationController {
 
     private final NotificationService notificationService;
-    private final DiscordNotificationService discordNotificationService;
 
     @GetMapping
     public ResponseEntity<NotificationListResponse> getNotificationsByReceiverId(

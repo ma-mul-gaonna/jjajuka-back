@@ -64,14 +64,14 @@ public class DiscordNotificationService {
                 .getShiftType()
                 .toString();
 
-        String responseUrl = String.format("%s/shift-swap/%d", serverBaseUrl, swap.getId());
+        String responseUrl = "https://dev.jjajuka.site/worker/shift-swap";
 
         String description = String.format(
                 "'%s' 님에게 교대 요청이 도착했습니다.\n\n" +
                         "> 요청자: %s\n" +
                         "> 근무 일자: %s (%s)\n\n" +
                         "[응답페이지로 이동하기](%s)",
-                target, requester, target, workDate, shiftType, responseUrl
+                target, requester, workDate, shiftType, responseUrl
         );
 
         DiscordEmbed embed = DiscordEmbed.builder()
