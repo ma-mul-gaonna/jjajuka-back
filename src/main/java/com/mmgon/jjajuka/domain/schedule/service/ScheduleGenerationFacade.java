@@ -58,6 +58,7 @@ public class ScheduleGenerationFacade {
                 savedRule,
                 members,
                 approvedDayoffs,
+                request.getShifts(),
                 request.getUserRequests()
         );
 
