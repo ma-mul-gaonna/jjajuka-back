@@ -45,4 +45,19 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(name = "employment_status")
     private EmploymentStatus employmentStatus;
+
+    public static Member create(String name, String loginId, String password, Authority authority,
+                                Position position, String phoneNumber, LocalDate hireDate,
+                                EmploymentStatus employmentStatus) {
+        Member member = new Member();
+        member.name = name;
+        member.loginId = loginId;
+        member.password = password;
+        member.authority = authority;
+        member.position = position;
+        member.phoneNumber = phoneNumber;
+        member.hireDate = hireDate;
+        member.employmentStatus = employmentStatus;
+        return member;
+    }
 }
