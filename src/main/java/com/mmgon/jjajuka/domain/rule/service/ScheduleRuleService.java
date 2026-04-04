@@ -28,9 +28,6 @@ public class ScheduleRuleService {
 
     @Transactional
     public ScheduleRuleDto.Response create(ScheduleRuleDto.Request request) {
-        if (scheduleRuleRepository.existsByName(request.name())) {
-            throw new IllegalArgumentException("이미 존재하는 규칙 이름입니다: " + request.name());
-        }
         validate(request);
         ScheduleRule scheduleRule = request.toEntity();
         if (request.customValues() != null) {
@@ -44,10 +41,10 @@ public class ScheduleRuleService {
         validate(request);
         ScheduleRule scheduleRule = findById(id);
         scheduleRule.update(
-                request.name(),
-                request.minStaffPerShift(),
-                request.maxStaffPerShift(),
-                request.maxConsecutiveDays()
+                request.minRestHours(),
+                request.maxConsecutiveDays(),
+                request.maxShiftsPerDay(),
+                request.requiredCount()
         );
         return ScheduleRuleDto.Response.from(scheduleRule);
     }
@@ -63,11 +60,17 @@ public class ScheduleRuleService {
     }
 
     private void validate(ScheduleRuleDto.Request request) {
-        if (request.minStaffPerShift() > request.maxStaffPerShift()) {
-            throw new IllegalArgumentException("최소 인원이 최대 인원보다 클 수 없습니다.");
+        if (request.minRestHours() < 0) {
+            throw new IllegalArgumentException("최소 휴식 시간은 0 이상이어야 합니다.");
         }
         if (request.maxConsecutiveDays() < 1) {
             throw new IllegalArgumentException("최대 연속 근무일은 1일 이상이어야 합니다.");
+        }
+        if (request.maxShiftsPerDay() < 1) {
+            throw new IllegalArgumentException("일일 최대 근무 수는 1 이상이어야 합니다.");
+        }
+        if (request.requiredCount() < 1) {
+            throw new IllegalArgumentException("필요 인원은 1 이상이어야 합니다.");
         }
     }
 }

@@ -18,40 +18,40 @@ public class ScheduleRule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(length = 50, nullable = false)
-    private String name;
-
     @Column(nullable = false)
-    private int minStaffPerShift;
-
-    @Column(nullable = false)
-    private int maxStaffPerShift;
+    private int minRestHours;
 
     @Column(nullable = false)
     private int maxConsecutiveDays;
+
+    @Column(nullable = false)
+    private int maxShiftsPerDay;
+
+    @Column(nullable = false)
+    private int requiredCount;
 
 
     @OneToMany(mappedBy = "scheduleRule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RuleCustom> ruleCustoms = new ArrayList<>();
 
     @Builder
-    public ScheduleRule(String name, int minStaffPerShift, int maxStaffPerShift,
-                        int maxConsecutiveDays) {
-        this.name = name;
-        this.minStaffPerShift = minStaffPerShift;
-        this.maxStaffPerShift = maxStaffPerShift;
+    public ScheduleRule(int minRestHours, int maxConsecutiveDays,
+                        int maxShiftsPerDay, int requiredCount) {
+        this.minRestHours = minRestHours;
         this.maxConsecutiveDays = maxConsecutiveDays;
+        this.maxShiftsPerDay = maxShiftsPerDay;
+        this.requiredCount = requiredCount;
     }
 
     public void addRuleCustom(String customValue) {
         ruleCustoms.add(new RuleCustom(customValue, this));
     }
 
-    public void update(String name, int minStaffPerShift, int maxStaffPerShift,
-                       int maxConsecutiveDays) {
-        this.name = name;
-        this.minStaffPerShift = minStaffPerShift;
-        this.maxStaffPerShift = maxStaffPerShift;
+    public void update(int minRestHours, int maxConsecutiveDays,
+                       int maxShiftsPerDay, int requiredCount) {
+        this.minRestHours = minRestHours;
         this.maxConsecutiveDays = maxConsecutiveDays;
+        this.maxShiftsPerDay = maxShiftsPerDay;
+        this.requiredCount = requiredCount;
     }
 }

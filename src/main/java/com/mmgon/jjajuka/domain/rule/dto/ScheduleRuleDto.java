@@ -7,28 +7,28 @@ import java.util.List;
 public class ScheduleRuleDto {
 
     public record Request(
-            String name,
-            int minStaffPerShift,
-            int maxStaffPerShift,
+            int minRestHours,
             int maxConsecutiveDays,
+            int maxShiftsPerDay,
+            int requiredCount,
             List<String> customValues
     ) {
         public ScheduleRule toEntity() {
             return ScheduleRule.builder()
-                    .name(name)
-                    .minStaffPerShift(minStaffPerShift)
-                    .maxStaffPerShift(maxStaffPerShift)
+                    .minRestHours(minRestHours)
                     .maxConsecutiveDays(maxConsecutiveDays)
+                    .maxShiftsPerDay(maxShiftsPerDay)
+                    .requiredCount(requiredCount)
                     .build();
         }
     }
 
     public record Response(
             Integer id,
-            String name,
-            int minStaffPerShift,
-            int maxStaffPerShift,
+            int minRestHours,
             int maxConsecutiveDays,
+            int maxShiftsPerDay,
+            int requiredCount,
             List<String> customValues
     ) {
         public static Response from(ScheduleRule scheduleRule) {
@@ -37,10 +37,10 @@ public class ScheduleRuleDto {
                     .toList();
             return new Response(
                     scheduleRule.getId(),
-                    scheduleRule.getName(),
-                    scheduleRule.getMinStaffPerShift(),
-                    scheduleRule.getMaxStaffPerShift(),
+                    scheduleRule.getMinRestHours(),
                     scheduleRule.getMaxConsecutiveDays(),
+                    scheduleRule.getMaxShiftsPerDay(),
+                    scheduleRule.getRequiredCount(),
                     customValues
             );
         }
