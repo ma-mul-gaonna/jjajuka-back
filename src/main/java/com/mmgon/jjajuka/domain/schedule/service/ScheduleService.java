@@ -40,6 +40,11 @@ public class ScheduleService {
                 .orElseThrow(() -> new IllegalArgumentException("Schedule not found: " + id));
     }
 
+    public List<Schedule> findMonthlyScheduleByMember(Integer memberId, YearMonth yearMonth) {
+        LocalDate startDate = yearMonth.atDay(1);
+        LocalDate endDate = yearMonth.atEndOfMonth();
+        return scheduleRepository.findByMemberIdAndWorkDateBetweenOrderByWorkDate(memberId, startDate, endDate);
+  }
     @Transactional
     public Integer saveGeneratedSchedules(
             String scheduleYearMonth,
