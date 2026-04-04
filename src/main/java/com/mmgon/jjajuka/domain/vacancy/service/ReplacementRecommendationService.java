@@ -111,6 +111,7 @@ public class ReplacementRecommendationService {
 
         RecommendationResponse result = response.getBody();
         result.setVacancyId(vacancy.getId());
+        result.setScheduleId(vacancy.getSchedule().getId());
         result.setVacancyMemberName(vacancy.getMember().getName());
         return result;
     }
