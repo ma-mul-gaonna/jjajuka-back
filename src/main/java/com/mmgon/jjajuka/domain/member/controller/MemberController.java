@@ -28,6 +28,12 @@ MemberController {
         return ResponseEntity.ok(memberService.create(request));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        memberService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Member> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(memberService.findById(id));
