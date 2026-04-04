@@ -55,6 +55,7 @@ public class DiscordNotificationService {
 
     private DiscordWebhookRequest buildSwapRequestMessage(Swap swap) {
 
+        String requester = swap.getRequester().getName();
         String target = swap.getTarget().getName();
         String workDate = swap.getRequesterSchedule()
                 .getWorkDate()
@@ -67,10 +68,10 @@ public class DiscordNotificationService {
 
         String description = String.format(
                 "'%s' 님에게 교대 요청이 도착했습니다.\n\n" +
-                        "> 대상자: %s\n" +
+                        "> 요청자: %s\n" +
                         "> 근무 일자: %s (%s)\n\n" +
                         "[응답페이지로 이동하기](%s)",
-                target, target, workDate, shiftType, responseUrl
+                target, requester, target, workDate, shiftType, responseUrl
         );
 
         DiscordEmbed embed = DiscordEmbed.builder()
@@ -83,6 +84,7 @@ public class DiscordNotificationService {
                 .content("새로운 교대 근무 요청이 도착했어요!")
                 .username("짜주까 알림봇")
                 .embeds(List.of(embed))
+                //.avatar_url("") TODO: Logo 생성 시 추가 필요
                 .build();
     }
 }
