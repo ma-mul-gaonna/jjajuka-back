@@ -25,4 +25,7 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
 
     int countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDate start, LocalDate end);
 
+    @Query("SELECT v FROM Vacancy v JOIN FETCH v.member JOIN FETCH v.schedule WHERE v.status = :status")
+    List<Vacancy> findAllByStatus(VacancyStatus status);
+
 }
