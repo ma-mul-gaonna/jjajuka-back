@@ -2,7 +2,6 @@ package com.mmgon.jjajuka.domain.schedule.service;
 
 import com.mmgon.jjajuka.domain.dayoff.entity.Dayoff;
 import com.mmgon.jjajuka.domain.dayoff.repository.DayoffRepository;
-import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import com.mmgon.jjajuka.domain.rule.dto.ScheduleRuleDto;
 import com.mmgon.jjajuka.domain.rule.entity.ScheduleRule;
@@ -12,7 +11,6 @@ import com.mmgon.jjajuka.domain.schedule.Mapper.AiScheduleRequestMapper;
 import com.mmgon.jjajuka.domain.schedule.controller.request.AiScheduleRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.request.ScheduleGenerateRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.response.AiScheduleResponse;
-import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleGenerateResponse;
 import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleResponse;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.DayoffStatus;
@@ -44,6 +42,10 @@ public class ScheduleGenerationFacade {
         ScheduleRule savedRule = scheduleRuleRepository.findWithRuleCustomsById(savedRuleDto.id())
                 .orElseThrow(() -> new IllegalArgumentException("저장된 규칙을 찾을 수 없습니다."));
 
+        List<String> ruleCustomValues = savedRule.getRuleCustoms().stream()
+                .map(ruleCustom -> ruleCustom.getCustomValue())
+                .toList();
+
         // 2. 사원 조회
         var members = memberRepository.findAllByAuthority(Authority.USER);
 
@@ -62,7 +64,8 @@ public class ScheduleGenerationFacade {
                 members,
                 approvedDayoffs,
                 request.getShifts(),
-                request.getUserRequests()
+                request.getUserRequests(),
+                ruleCustomValues
         );
 
         // 5. AI 호출
