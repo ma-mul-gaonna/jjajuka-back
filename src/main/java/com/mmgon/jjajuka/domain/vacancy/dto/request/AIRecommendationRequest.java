@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.vacancy.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +14,15 @@ import java.util.List;
 @AllArgsConstructor
 public class AIRecommendationRequest {
 
+    @JsonProperty("input_json")
     private InputJsonDto inputJson;
+
+    @JsonProperty("current_schedule")
     private CurrentScheduleDto currentSchedule;
+
     private AbsenceDto absence;
+
+    @JsonProperty("user_request")
     private List<String> userRequest;
 
     @Data
