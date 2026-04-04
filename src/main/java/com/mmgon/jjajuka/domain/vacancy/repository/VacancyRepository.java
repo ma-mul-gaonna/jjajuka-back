@@ -1,9 +1,11 @@
 package com.mmgon.jjajuka.domain.vacancy.repository;
 
 import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.global.enums.VacancyStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
@@ -13,4 +15,6 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
             "JOIN FETCH v.schedule " +
             "ORDER BY v.createdAt DESC")
     List<Vacancy> findAllWithMemberAndSchedule();
+
+    int countByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDate start, LocalDate end);
 }
