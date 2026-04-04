@@ -29,6 +29,8 @@ public class ScheduleRuleService {
     @Transactional
     public ScheduleRuleDto.Response create(ScheduleRuleDto.Request request) {
         validate(request);
+        scheduleRuleRepository.deleteAll();
+        scheduleRuleRepository.flush();
         ScheduleRule scheduleRule = request.toEntity();
         if (request.customValues() != null) {
             request.customValues().forEach(scheduleRule::addRuleCustom);
