@@ -16,6 +16,12 @@ import java.util.List;
 @Component
 public class AiScheduleRequestMapper {
 
+    private final DefaultShiftPolicy defaultShiftPolicy;
+
+    public AiScheduleRequestMapper(DefaultShiftPolicy defaultShiftPolicy) {
+        this.defaultShiftPolicy = defaultShiftPolicy;
+    }
+
     public AiScheduleRequest toRequest(
             String scheduleYearMonth,
             ScheduleRule rule,
@@ -32,25 +38,22 @@ public class AiScheduleRequestMapper {
                 .map(this::toMemberDto)
                 .toList();
 
-        if (shiftRequests == null || shiftRequests.isEmpty()) {
-            throw new IllegalArgumentException("시프트 정보는 필수입니다.");
-        }
-
-        List<InputJson.ShiftDto> shifts = shiftRequests.stream()
-                .map(this::toShiftDto)
-                .toList();
+        List<InputJson.ShiftDto> shifts =
+                (shiftRequests == null || shiftRequests.isEmpty())
+                        ? defaultShiftPolicy.createDefaultShifts(rule.getRequiredCount())
+                        : shiftRequests.stream()
+                        .map(this::toShiftDto)
+                        .toList();
 
         List<String> mergedUserRequests = new ArrayList<>();
         if (userRequests != null) {
             mergedUserRequests.addAll(userRequests);
         }
 
-        // 휴가 승인된 사람은 자연어 제약으로 추가
         for (Dayoff dayoff : dayoffs) {
             mergedUserRequests.add(dayoff.getMember().getName() + "는 " + dayoff.getDate() + " 쉬게 해줘");
         }
 
-        // rule.customValues 도 자연어 제약으로 추가 가능
         rule.getRuleCustoms().forEach(custom ->
                 mergedUserRequests.add(custom.getCustomValue())
         );
