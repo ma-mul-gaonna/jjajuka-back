@@ -22,6 +22,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.mmgon.jjajuka.global.enums.VacancyStatus;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -43,27 +45,39 @@ public class ReplacementRecommendationService {
     @Value("${ai.base-url}")
     private String aiBaseUrl;
 
-    public RecommendationResponse recommend(Integer vacancyId) {
+    public List<RecommendationResponse> recommend() {
 
-        Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new VacancyException(VACANCY_NOT_FOUND));
-
-        Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
-        List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
-        List<Member> members = memberRepository.findAll();
+        List<Vacancy> pendingVacancies = vacancyRepository.findAllByStatus(VacancyStatus.PENDING);
 
         ScheduleRule rule = scheduleRuleRepository.findAll().stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("ScheduleRule이 없습니다."));
 
         List<RuleCustom> ruleCustom = ruleCustomRepository.findByScheduleRuleId(rule.getId());
+        List<Member> members = memberRepository.findAll();
+
+        String url = "http://54.116.89.225:8000" + "/api/recommend-replacement";
+
+        return pendingVacancies.stream()
+                .map(vacancy -> recommendForVacancy(vacancy, members, rule, ruleCustom, url))
+                .toList();
+    }
+
+    private RecommendationResponse recommendForVacancy(
+            Vacancy vacancy,
+            List<Member> members,
+            ScheduleRule rule,
+            List<RuleCustom> ruleCustom,
+            String url
+    ) {
+        Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
+        List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
 
         AIRecommendationRequest request = createAiRequest(vacancy, schedules, members, rule, ruleCustom);
 
-        String url = aiBaseUrl + "/api/recommend-replacement";
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Connection", "close");
 
         HttpEntity<AIRecommendationRequest> httpEntity = new HttpEntity<>(request, headers);
 
@@ -75,10 +89,10 @@ public class ReplacementRecommendationService {
         );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new IllegalStateException("AI 서버 호출에 실패했습니다.");
+            throw new IllegalStateException("AI 서버 호출에 실패했습니다. vacancyId=" + vacancy.getId());
         }
 
-        candidateRepository.deleteByVacancyId(vacancyId);
+        candidateRepository.deleteByVacancyId(vacancy.getId());
 
         List<ReplacementCandidate> candidates = response.getBody().getRecommendations().stream()
                 .map(r -> {
@@ -88,14 +102,16 @@ public class ReplacementRecommendationService {
                             .vacancy(vacancy)
                             .candidateMember(member)
                             .candidateRank(r.getRank())
-                            .reason(String.join(", ", r.getReasons()))
+                            .reason(r.getReasons())
                             .isSelected(false)
                             .build();
                 }).toList();
 
         candidateRepository.saveAll(candidates);
 
-        return response.getBody();
+        RecommendationResponse result = response.getBody();
+        result.setVacancyId(vacancy.getId());
+        return result;
     }
 
     private AIRecommendationRequest createAiRequest(
