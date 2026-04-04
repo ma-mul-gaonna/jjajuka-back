@@ -51,7 +51,7 @@ public class ScheduleController {
 
     // 근무표 규칙 저장 + 근무표 생성 오케스트레이션 API
     @PostMapping("/work-schedules/generate-with-rules")
-    public ResponseEntity<ScheduleGenerateResponse> generateWithRules(
+    public ResponseEntity<ScheduleResponse> generateWithRules(
             @RequestBody ScheduleGenerateRequest request,
             HttpSession session
     ) {
