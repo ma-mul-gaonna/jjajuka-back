@@ -3,8 +3,7 @@ package com.mmgon.jjajuka.domain.member.dto;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.EmploymentStatus;
-import com.mmgon.jjajuka.global.enums.Grade;
-import com.mmgon.jjajuka.global.enums.Position;
+import com.mmgon.jjajuka.global.enums.Skills;
 
 import java.time.LocalDate;
 
@@ -12,11 +11,11 @@ public record MemberResponse(
         Integer id,
         String name,
         Authority authority,
-        Position position,
-        Grade grade,
+        String position,
         String phoneNumber,
         LocalDate hireDate,
-        EmploymentStatus employmentStatus
+        EmploymentStatus employmentStatus,
+        Skills skills
 ) {
     public static MemberResponse from(Member member) {
         return new MemberResponse(
@@ -24,10 +23,10 @@ public record MemberResponse(
                 member.getName(),
                 member.getAuthority(),
                 member.getPosition(),
-                member.getPosition() != null ? member.getPosition().getGrade() : null,
                 member.getPhoneNumber(),
                 member.getHireDate(),
-                member.getEmploymentStatus()
+                member.getEmploymentStatus(),
+                member.getSkill()
         );
     }
 }

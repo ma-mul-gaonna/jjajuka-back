@@ -3,7 +3,7 @@ package com.mmgon.jjajuka.domain.member.dto;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.EmploymentStatus;
-import com.mmgon.jjajuka.global.enums.Position;
+import com.mmgon.jjajuka.global.enums.Skills;
 
 import java.time.LocalDate;
 
@@ -12,12 +12,13 @@ public record MemberCreateRequest(
         String loginId,
         String password,
         Authority authority,
-        Position position,
+        String position,
         String phoneNumber,
         LocalDate hireDate,
-        EmploymentStatus employmentStatus
+        EmploymentStatus employmentStatus,
+        Skills skills
 ) {
     public Member toEntity() {
-        return Member.create(name, loginId, password, authority, position, phoneNumber, hireDate, employmentStatus);
+        return Member.create(name, loginId, password, authority, position, phoneNumber, hireDate, employmentStatus, skills);
     }
 }
