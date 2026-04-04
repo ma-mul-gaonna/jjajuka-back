@@ -2,7 +2,7 @@ package com.mmgon.jjajuka.domain.member.entity;
 
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.EmploymentStatus;
-import com.mmgon.jjajuka.global.enums.Position;
+import com.mmgon.jjajuka.global.enums.Skills;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,9 +32,8 @@ public class Member {
     @Column(nullable = false)
     private Authority authority;
 
-    @Enumerated(EnumType.STRING)
-    @Column
-    private Position position;
+    @Column(length = 20)
+    private String position;
 
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
@@ -46,9 +45,13 @@ public class Member {
     @Column(name = "employment_status")
     private EmploymentStatus employmentStatus;
 
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Skills skills;
+
     public static Member create(String name, String loginId, String password, Authority authority,
-                                Position position, String phoneNumber, LocalDate hireDate,
-                                EmploymentStatus employmentStatus) {
+                                String position, String phoneNumber, LocalDate hireDate,
+                                EmploymentStatus employmentStatus, Skills skills) {
         Member member = new Member();
         member.name = name;
         member.loginId = loginId;
@@ -58,6 +61,7 @@ public class Member {
         member.phoneNumber = phoneNumber;
         member.hireDate = hireDate;
         member.employmentStatus = employmentStatus;
+        member.skills = skills;
         return member;
     }
 }
