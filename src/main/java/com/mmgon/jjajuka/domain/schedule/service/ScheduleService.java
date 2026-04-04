@@ -9,6 +9,7 @@ import com.mmgon.jjajuka.domain.schedule.entity.ScheduleGroup;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleGroupRepository;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
+import com.mmgon.jjajuka.domain.vacancy.repository.ReplacementCandidateRepository;
 import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.ScheduleType;
@@ -33,6 +34,7 @@ public class ScheduleService {
     private final MemberRepository memberRepository;
     private final ScheduleGroupRepository scheduleGroupRepository;
     private final VacancyRepository vacancyRepository;
+    private final ReplacementCandidateRepository replacementCandidateRepository;
     private final SwapRepository swapRepository;
 
     public List<Schedule> findAll() {
@@ -58,13 +60,16 @@ public class ScheduleService {
     ) {
         validateAssignments(aiScheduleResponse);
 
-        ScheduleGroup scheduleGroup = scheduleGroupRepository
-                .findTopByScheduleYearMonthOrderByIdDesc(scheduleYearMonth)
+        List<ScheduleGroup> existingScheduleGroups = scheduleGroupRepository
+                .findAllByScheduleYearMonthOrderByIdAsc(scheduleYearMonth);
+
+        ScheduleGroup scheduleGroup = existingScheduleGroups.stream()
+                .findFirst()
                 .orElseGet(() -> scheduleGroupRepository.save(
                         ScheduleGroup.create(scheduleYearMonth, reason)
                 ));
 
-        validateReplaceAvailable(scheduleGroup.getId());
+        deleteRelatedSchedulesData(scheduleGroup.getId());
 
         scheduleGroup.updateReason(reason);
         scheduleRepository.deleteByScheduleGroupId(scheduleGroup.getId());
@@ -151,16 +156,10 @@ public class ScheduleService {
         }
     }
 
-    private void validateReplaceAvailable(Integer scheduleGroupId) {
-        boolean hasVacancy = vacancyRepository.existsBySchedule_ScheduleGroup_Id(scheduleGroupId);
-        boolean hasSwap = swapRepository.existsByRequesterSchedule_ScheduleGroup_IdOrTargetSchedule_ScheduleGroup_Id(
-                scheduleGroupId,
-                scheduleGroupId
-        );
-
-        if (hasVacancy || hasSwap) {
-            throw new IllegalArgumentException("이미 결원 신청 또는 교대 요청이 존재하는 근무표는 재생성할 수 없습니다.");
-        }
+    private void deleteRelatedSchedulesData(Integer scheduleGroupId) {
+        replacementCandidateRepository.deleteAllByScheduleGroupId(scheduleGroupId);
+        vacancyRepository.deleteAllByScheduleGroupId(scheduleGroupId);
+        swapRepository.deleteAllByScheduleGroupId(scheduleGroupId);
     }
 
     private boolean isVisibleSchedule(Schedule schedule) {

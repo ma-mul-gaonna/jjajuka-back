@@ -14,6 +14,10 @@ public interface ReplacementCandidateRepository extends JpaRepository<Replacemen
     @Query("DELETE FROM ReplacementCandidate rc WHERE rc.vacancy.id = :vacancyId")
     void deleteByVacancyId(@Param("vacancyId") Integer vacancyId);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM ReplacementCandidate rc WHERE rc.vacancy.schedule.scheduleGroup.id = :scheduleGroupId")
+    void deleteAllByScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
+
     boolean existsByVacancyId(Integer vacancyId);
 
     List<ReplacementCandidate> findByVacancyIdOrderByCandidateRankAsc(Integer vacancyId);
