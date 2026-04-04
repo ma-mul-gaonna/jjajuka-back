@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.member.controller;
 
+import com.mmgon.jjajuka.domain.member.dto.MemberResponse;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ MemberController {
     private final MemberService memberService;
 
     @GetMapping
-    public ResponseEntity<List<Member>> getAll() {
+    public ResponseEntity<List<MemberResponse>> getAll() {
         return ResponseEntity.ok(memberService.findAll());
     }
 

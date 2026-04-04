@@ -1,9 +1,13 @@
 package com.mmgon.jjajuka.domain.member.entity;
 
 import com.mmgon.jjajuka.global.enums.Authority;
+import com.mmgon.jjajuka.global.enums.EmploymentStatus;
+import com.mmgon.jjajuka.global.enums.Position;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "member")
@@ -25,6 +29,20 @@ public class Member {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "authority", nullable = false)
+    @Column(nullable = false)
     private Authority authority;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Position position;
+
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Column(name = "hire_date")
+    private LocalDate hireDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_status")
+    private EmploymentStatus employmentStatus;
 }
