@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import java.util.List;
 
 @Data
@@ -13,11 +14,13 @@ import java.util.List;
 @AllArgsConstructor
 public class RecommendationResponse {
 
+    private Integer vacancyId;
+    private String vacancyMemberName;
     private String status;
     private String message;
     private AbsenceDto absence;
     private List<RecommendationDto> recommendations;
-    private List<String> warnings;
+    private List<Object> warnings;
 
     @Data
     @Builder
@@ -35,7 +38,9 @@ public class RecommendationResponse {
     @AllArgsConstructor
     public static class RecommendationDto {
         private int rank;
+        @JsonAlias("user_id")
         private Long userId;
+        @JsonAlias("user_name")
         private String userName;
         private int score;
         private String reasons;
