@@ -70,6 +70,12 @@ public class ReplacementRecommendationService {
             List<RuleCustom> ruleCustom,
             String url
     ) {
+        boolean exists = candidateRepository.existsByVacancyId(vacancy.getId());
+
+        if (exists) {
+            return createResponseFromExistingCandidates(vacancy);
+        }
+
         Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
         List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
 
@@ -114,6 +120,27 @@ public class ReplacementRecommendationService {
         result.setScheduleId(vacancy.getSchedule().getId());
         result.setVacancyMemberName(vacancy.getMember().getName());
         return result;
+    }
+
+    private RecommendationResponse createResponseFromExistingCandidates(Vacancy vacancy) {
+
+        List<ReplacementCandidate> candidates = candidateRepository.findByVacancyIdOrderByCandidateRankAsc(vacancy.getId());
+
+        List<RecommendationResponse.RecommendationDto> recommendationDtos =
+                candidates.stream()
+                        .map(c -> RecommendationResponse.RecommendationDto.builder()
+                                .userId(c.getCandidateMember().getId().longValue())
+                                .rank(c.getCandidateRank())
+                                .reasons(c.getReason())
+                                .build())
+                        .toList();
+
+        return RecommendationResponse.builder()
+                .vacancyId(vacancy.getId())
+                .scheduleId(vacancy.getSchedule().getId())
+                .vacancyMemberName(vacancy.getMember().getName())
+                .recommendations(recommendationDtos)
+                .build();
     }
 
     private AIRecommendationRequest createAiRequest(
