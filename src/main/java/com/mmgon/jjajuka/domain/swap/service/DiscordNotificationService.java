@@ -64,7 +64,7 @@ public class DiscordNotificationService {
                 .getShiftType()
                 .toString();
 
-        String responseUrl = "https://dev.jjajuka.site/worker/requests";
+        String responseUrl = "https://dev.jjajuka.site/worker/shift-swap";
 
         String description = String.format(
                 "'%s' 님에게 교대 요청이 도착했습니다.\n\n" +
