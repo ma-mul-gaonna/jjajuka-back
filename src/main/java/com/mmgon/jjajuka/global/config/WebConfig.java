@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private String frontendHost = "http://localhost:5173";
+    private String frontendHost = "http://localhost:3000";
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
