@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.member.service;
 
+import com.mmgon.jjajuka.domain.member.dto.MemberCreateRequest;
 import com.mmgon.jjajuka.domain.member.dto.MemberResponse;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
@@ -25,5 +26,13 @@ public class MemberService {
     public Member findById(Integer id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found: " + id));
+    }
+
+    @Transactional
+    public MemberResponse create(MemberCreateRequest request) {
+        if (memberRepository.findByLoginId(request.loginId()).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 아이디입니다: " + request.loginId());
+        }
+        return MemberResponse.from(memberRepository.save(request.toEntity()));
     }
 }

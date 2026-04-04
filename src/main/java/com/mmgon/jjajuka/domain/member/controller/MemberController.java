@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.member.controller;
 
+import com.mmgon.jjajuka.domain.member.dto.MemberCreateRequest;
 import com.mmgon.jjajuka.domain.member.dto.MemberResponse;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.service.MemberService;
@@ -20,6 +21,11 @@ MemberController {
     @GetMapping
     public ResponseEntity<List<MemberResponse>> getAll() {
         return ResponseEntity.ok(memberService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<MemberResponse> create(@RequestBody MemberCreateRequest request) {
+        return ResponseEntity.ok(memberService.create(request));
     }
 
     @GetMapping("/{id}")
