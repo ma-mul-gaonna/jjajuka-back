@@ -56,7 +56,7 @@ public class ReplacementRecommendationService {
         List<RuleCustom> ruleCustom = ruleCustomRepository.findByScheduleRuleId(rule.getId());
         List<Member> members = memberRepository.findAll();
 
-        String url = "http://54.116.89.225:8000" + "/api/recommend-replacement";
+        String url = aiBaseUrl + "/api/recommend-replacement";
 
         return pendingVacancies.stream()
                 .map(vacancy -> recommendForVacancy(vacancy, members, rule, ruleCustom, url))
@@ -111,6 +111,7 @@ public class ReplacementRecommendationService {
 
         RecommendationResponse result = response.getBody();
         result.setVacancyId(vacancy.getId());
+        result.setVacancyMemberName(vacancy.getMember().getName());
         return result;
     }
 
