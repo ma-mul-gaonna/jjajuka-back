@@ -2,7 +2,10 @@ package com.mmgon.jjajuka.domain.swap.controller;
 
 import com.mmgon.jjajuka.domain.auth.dto.LoginResponse;
 import com.mmgon.jjajuka.domain.swap.controller.request.SwapCreateRequest;
+import com.mmgon.jjajuka.domain.swap.controller.request.SwapDecisionRequest;
 import com.mmgon.jjajuka.domain.swap.controller.response.SwapCreateResponse;
+import com.mmgon.jjajuka.domain.swap.controller.response.SwapDecisionResponse;
+import com.mmgon.jjajuka.domain.swap.controller.response.SwapResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -47,5 +50,36 @@ public class SwapController {
 
         SwapCreateResponse response = swapService.createSwapRequest(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/shift-swap/received/{swapId}")
+    public ResponseEntity<SwapResponse> getReceivedSwap(
+            @PathVariable Integer swapId,
+            HttpSession session
+    ) {
+        LoginResponse loginMember = (LoginResponse) session.getAttribute(SESSION_MEMBER_KEY);
+        if (loginMember == null) {
+            throw new SwapException(SwapErrorCode.UNAUTHORIZED);
+        }
+
+        SwapResponse response = swapService.getReceivedSwap(swapId, loginMember.getId());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/shift-swap/{swapId}/decision")
+    public ResponseEntity<SwapDecisionResponse> respondToSwap(
+            @PathVariable Integer swapId,
+            @RequestBody @Valid SwapDecisionRequest request,
+            HttpSession session
+    ) {
+        LoginResponse loginMember = (LoginResponse) session.getAttribute(SESSION_MEMBER_KEY);
+        if (loginMember == null) {
+            throw new SwapException(SwapErrorCode.UNAUTHORIZED);
+        }
+
+        SwapDecisionResponse response =
+                swapService.respondToSwap(swapId, loginMember.getId(), request);
+
+        return ResponseEntity.ok(response);
     }
 }
