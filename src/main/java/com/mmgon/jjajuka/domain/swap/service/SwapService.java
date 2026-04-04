@@ -54,6 +54,7 @@ public class SwapService {
         Schedule requesterSchedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new SwapException(SwapErrorCode.SCHEDULE_NOT_FOUND));
 
+/*
         if (requesterSchedule.getStatus() != ScheduleStatus.CANCELED) {
             throw new SwapException(SwapErrorCode.SCHEDULE_NOT_CANCELLED);
         }
@@ -66,12 +67,15 @@ public class SwapService {
                 .ifPresent(existingSwap -> {
                     throw new SwapException(SwapErrorCode.SWAP_ALREADY_EXISTS);
                 });
+*/
 
         Member requester = requesterSchedule.getMember();
 
+/*
         if (requester.getId().equals(target.getId())) {
             throw new SwapException(SwapErrorCode.CANNOT_SWAP_WITH_SELF);
         }
+*/
 
         Swap swap = Swap.createSwapRequest(requester, target, requesterSchedule);
         Swap savedSwap = swapRepository.save(swap);
