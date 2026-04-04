@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
+   List<Schedule> findByScheduleGroupId(Integer scheduleGroupId);
 
     List<Schedule> findByMemberIdAndWorkDateBetweenOrderByWorkDate(
             Integer memberId, LocalDate startDate, LocalDate endDate);

@@ -2,6 +2,7 @@ package com.mmgon.jjajuka.domain.vacancy.entity;
 
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -31,4 +32,13 @@ public class ReplacementCandidate {
 
     @Column(name = "is_selected")
     private Boolean isSelected;
+
+    @Builder
+    public ReplacementCandidate(Vacancy vacancy, Member candidateMember, Integer candidateRank, String reason, Boolean isSelected) {
+        this.vacancy = vacancy;
+        this.candidateMember = candidateMember;
+        this.candidateRank = candidateRank;
+        this.reason = reason;
+        this.isSelected = isSelected;
+    }
 }

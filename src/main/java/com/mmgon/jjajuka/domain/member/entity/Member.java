@@ -2,6 +2,7 @@ package com.mmgon.jjajuka.domain.member.entity;
 
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.EmploymentStatus;
+import com.mmgon.jjajuka.global.enums.ScheduleType;
 import com.mmgon.jjajuka.global.enums.Skills;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -48,6 +49,10 @@ public class Member {
     @Enumerated(EnumType.STRING)
     @Column(name = "skills")
     private Skills skills;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ScheduleType preferredShifts;
 
     public static Member create(String name, String loginId, String password, Authority authority,
                                 String position, String phoneNumber, LocalDate hireDate,
