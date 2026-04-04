@@ -2,7 +2,6 @@ package com.mmgon.jjajuka.domain.schedule.repository;
 
 import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -10,4 +9,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
 
     List<Schedule> findByMemberIdAndWorkDateBetweenOrderByWorkDate(
             Integer memberId, LocalDate startDate, LocalDate endDate);
+
+    List<Schedule> findAllByScheduleGroupIdOrderByWorkDateAscIdAsc(Integer scheduleGroupId);
+
 }

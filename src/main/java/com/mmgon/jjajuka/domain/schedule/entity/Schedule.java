@@ -4,6 +4,7 @@ import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.ScheduleType;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,4 +38,35 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ScheduleStatus status;
+
+    @Builder
+    public Schedule(
+            ScheduleGroup scheduleGroup,
+            Member member,
+            LocalDate workDate,
+            ScheduleType shiftType,
+            ScheduleStatus status
+    ) {
+        this.scheduleGroup = scheduleGroup;
+        this.member = member;
+        this.workDate = workDate;
+        this.shiftType = shiftType;
+        this.status = status;
+    }
+
+    public static Schedule create(
+            ScheduleGroup scheduleGroup,
+            Member member,
+            LocalDate workDate,
+            ScheduleType shiftType,
+            ScheduleStatus status
+    ) {
+        return Schedule.builder()
+                .scheduleGroup(scheduleGroup)
+                .member(member)
+                .workDate(workDate)
+                .shiftType(shiftType)
+                .status(status)
+                .build();
+    }
 }
