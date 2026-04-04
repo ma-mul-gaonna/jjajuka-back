@@ -18,7 +18,7 @@ public class AiScheduleClient {
     private String aiBaseUrl;
 
     public AiScheduleResponse generate(AiScheduleRequest request) {
-        String url = aiBaseUrl + "/api/work-schedules/generate";
+        String url = aiBaseUrl + "/api/schedule";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
