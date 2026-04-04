@@ -10,7 +10,7 @@ import com.mmgon.jjajuka.domain.notification.exception.NotificationException;
 import com.mmgon.jjajuka.domain.notification.repository.NotificationRepository;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
-import com.mmgon.jjajuka.domain.vacancy.controller.response.VacancyNotificationResponse;
+import com.mmgon.jjajuka.domain.vacancy.dto.response.VacancyNotificationResponse;
 import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.NotiType;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

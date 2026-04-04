@@ -1,4 +1,4 @@
-package com.mmgon.jjajuka.domain.vacancy.controller.response;
+package com.mmgon.jjajuka.domain.vacancy.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

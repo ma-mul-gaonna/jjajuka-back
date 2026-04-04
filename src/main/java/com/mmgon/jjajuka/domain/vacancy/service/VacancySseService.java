@@ -1,7 +1,7 @@
 package com.mmgon.jjajuka.domain.vacancy.service;
 
 import com.mmgon.jjajuka.domain.notification.service.NotificationService;
-import com.mmgon.jjajuka.domain.vacancy.controller.response.VacancyNotificationResponse;
+import com.mmgon.jjajuka.domain.vacancy.dto.response.VacancyNotificationResponse;
 import com.mmgon.jjajuka.domain.vacancy.event.VacancyCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

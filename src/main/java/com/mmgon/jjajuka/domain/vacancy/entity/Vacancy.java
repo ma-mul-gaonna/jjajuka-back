@@ -4,6 +4,7 @@ import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.global.enums.VacancyStatus;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -36,4 +37,13 @@ public class Vacancy {
 
     @Column(length = 255)
     private String reason;
+
+    @Builder
+    public Vacancy(Member member, Schedule schedule, LocalDate createdAt, VacancyStatus status, String reason) {
+        this.member = member;
+        this.schedule = schedule;
+        this.createdAt = createdAt;
+        this.status = status;
+        this.reason = reason;
+    }
 }
