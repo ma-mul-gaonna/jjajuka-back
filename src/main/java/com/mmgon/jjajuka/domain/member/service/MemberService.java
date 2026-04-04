@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.member.service;
 
+import com.mmgon.jjajuka.domain.member.dto.MemberResponse;
 import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,10 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
-    public List<Member> findAll() {
-        return memberRepository.findAll();
+    public List<MemberResponse> findAll() {
+        return memberRepository.findAll().stream()
+                .map(MemberResponse::from)
+                .toList();
     }
 
     public Member findById(Integer id) {
