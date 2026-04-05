@@ -89,8 +89,11 @@ public class ReplacementRecommendationService {
                 candidates.stream()
                         .map(c -> RecommendationResponse.RecommendationDto.builder()
                                 .userId(c.getCandidateMember().getId().longValue())
+                                .userName(c.getCandidateMember().getName())
                                 .rank(c.getCandidateRank())
                                 .reasons(c.getReason())
+                                .score(c.getScore())
+                                .status(c.getStatus())
                                 .build())
                         .toList();
 
@@ -142,6 +145,7 @@ public class ReplacementRecommendationService {
                             .candidateMember(member)
                             .candidateRank(r.getRank())
                             .reason(r.getReasons())
+                            .score(r.getScore())
                             .isSelected(false)
                             .build();
                 }).toList();

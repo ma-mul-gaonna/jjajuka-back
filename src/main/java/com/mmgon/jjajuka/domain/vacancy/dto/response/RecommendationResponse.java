@@ -1,5 +1,6 @@
 package com.mmgon.jjajuka.domain.vacancy.dto.response;
 
+import com.mmgon.jjajuka.global.enums.RecommendStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -44,6 +45,7 @@ public class RecommendationResponse {
         @JsonAlias("user_name")
         private String userName;
         private int score;
+        private RecommendStatus status;
         private String reasons;
     }
 }
