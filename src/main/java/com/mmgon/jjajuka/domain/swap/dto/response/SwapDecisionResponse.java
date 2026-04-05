@@ -20,16 +20,21 @@ public class SwapDecisionResponse {
         private SwapStatus status;
     }
 
-    public static SwapDecisionResponse from(Swap swap) {
-        String message = switch (swap.getStatus()) {
-            case ACCEPTED -> "교대 요청을 수락했습니다.";
-            case REJECTED -> "교대 요청을 거절했습니다.";
-            default -> "교대 요청 응답이 완료되었습니다.";
-        };
-
+    public static SwapDecisionResponse accepted(Swap swap) {
         return SwapDecisionResponse.builder()
                 .success(true)
-                .message(message)
+                .message("교대 요청을 수락했습니다.")
+                .data(Data.builder()
+                        .swapRequestId(swap.getId())
+                        .status(swap.getStatus())
+                        .build())
+                .build();
+    }
+
+    public static SwapDecisionResponse rejected(Swap swap) {
+        return SwapDecisionResponse.builder()
+                .success(true)
+                .message("교대 요청을 거절했습니다.")
                 .data(Data.builder()
                         .swapRequestId(swap.getId())
                         .status(swap.getStatus())

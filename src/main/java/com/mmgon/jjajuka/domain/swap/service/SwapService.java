@@ -157,43 +157,33 @@ public class SwapService {
 
         Schedule requesterSchedule = swap.getRequesterSchedule();
 
-        if (requesterSchedule.getWorkDate().isBefore(LocalDate.now())) {
-            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
-        }
-
-        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
-                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
-                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
-            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
-        }
-
         Vacancy vacancy = vacancyRepository
                 .findByScheduleIdAndMemberId(requesterSchedule.getId(), swap.getRequester().getId())
                 .stream()
                 .findFirst()
                 .orElse(null);
 
-        ReplacementCandidate replacementCandidate = vacancy == null
-                ? null
-                : candidateRepository.findByVacancyIdAndCandidateMemberId(vacancy.getId(), loginMemberId)
-                .stream()
-                .findFirst()
-                .orElse(null);
+        ReplacementCandidate replacementCandidate = null;
+        if (vacancy != null) {
+            replacementCandidate = candidateRepository
+                    .findByVacancyIdAndCandidateMemberId(vacancy.getId(), loginMemberId)
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+        }
 
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
 
             if (vacancy != null) {
                 vacancy.reject();
-            }
-            if (replacementCandidate != null) {
-                replacementCandidate.reject();
-            }
-            if (vacancy != null) {
+                if (replacementCandidate != null) {
+                    replacementCandidate.reject();
+                }
                 eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
             }
 
-            return SwapDecisionResponse.from(swap);
+            return SwapDecisionResponse.rejected(swap);
         }
 
         if (request.getTargetScheduleId() == null) {
@@ -211,9 +201,13 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
         }
 
-        if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE
-                && targetSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
-                && targetSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
+        if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
+                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
+                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
             throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
         }
 
@@ -226,6 +220,7 @@ public class SwapService {
 
         requesterSchedule.changeMember(targetMember);
         targetSchedule.changeMember(requesterMember);
+
         requesterSchedule.changeStatus(ScheduleStatus.ACTIVE);
         targetSchedule.changeStatus(ScheduleStatus.ACTIVE);
 
@@ -233,14 +228,12 @@ public class SwapService {
 
         if (vacancy != null) {
             vacancy.accept();
-        }
-        if (replacementCandidate != null) {
-            replacementCandidate.accept();
-        }
-        if (vacancy != null) {
+            if (replacementCandidate != null) {
+                replacementCandidate.accept();
+            }
             eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
         }
 
-        return SwapDecisionResponse.from(swap);
+        return SwapDecisionResponse.accepted(swap);
     }
 }
