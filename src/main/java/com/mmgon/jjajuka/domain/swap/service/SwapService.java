@@ -17,8 +17,10 @@ import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
+import com.mmgon.jjajuka.domain.vacancy.entity.ReplacementCandidate;
 import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import com.mmgon.jjajuka.domain.vacancy.event.VacancyCreatedEvent;
+import com.mmgon.jjajuka.domain.vacancy.repository.ReplacementCandidateRepository;
 import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.SwapStatus;
@@ -44,6 +46,7 @@ public class SwapService {
     private final DiscordNotificationService discordNotificationService;
     private final ApplicationEventPublisher eventPublisher;
     private final VacancyRepository vacancyRepository;
+    private final ReplacementCandidateRepository candidateRepository;
 
     public List<SwapAdminResponse> getAdminSwapList() {
         return swapRepository.findAllWithDetails()
@@ -157,9 +160,13 @@ public class SwapService {
         List<Vacancy> vacancy = vacancyRepository.findByScheduleIdAndMemberId(requesterSchedule.getId(), loginMemberId);
         Vacancy vacancyObj = vacancy.getFirst();
 
+        List<ReplacementCandidate> replacementCandidates = candidateRepository.findByVacancyIdAndCandidateMemberId(vacancyObj.getId(), loginMemberId);
+        ReplacementCandidate replacementCandidate = replacementCandidates.get(0);
+
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
             vacancyObj.reject();
+            replacementCandidate.reject();
 
             eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
             return SwapDecisionResponse.from(swap);
@@ -207,8 +214,8 @@ public class SwapService {
 
         // swap 요청 상태 변경
         swap.accept(targetSchedule);
-
         vacancyObj.accept();
+        replacementCandidate.accept();
 
         eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
         return SwapDecisionResponse.from(swap);

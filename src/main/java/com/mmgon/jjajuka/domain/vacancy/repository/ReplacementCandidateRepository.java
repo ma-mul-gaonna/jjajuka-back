@@ -23,7 +23,7 @@ public interface ReplacementCandidateRepository extends JpaRepository<Replacemen
 
     List<ReplacementCandidate> findByVacancyIdOrderByCandidateRankAsc(Integer vacancyId);
 
-    List<ReplacementCandidate> findByCandidateMemberIdAndVacancyId(Integer memberId, Integer vacancyId);
+    List<ReplacementCandidate> findByVacancyIdAndCandidateMemberId(Integer vacancyId, Integer candidateMemberId);
 
     @Modifying
     @Query("update ReplacementCandidate rc set rc.status = :status where rc.id = :id")

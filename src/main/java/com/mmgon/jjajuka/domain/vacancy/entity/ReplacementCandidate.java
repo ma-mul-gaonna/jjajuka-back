@@ -41,6 +41,14 @@ public class ReplacementCandidate {
     @Column(name = "status")
     private RecommendStatus status;
 
+    public void accept() {
+        this.status = RecommendStatus.APPROVED;
+    }
+
+    public void reject() {
+        this.status = RecommendStatus.REJECTED;
+    }
+
     @Builder
     public ReplacementCandidate(Vacancy vacancy, Member candidateMember, Integer candidateRank, String reason, Boolean isSelected, Integer score) {
         this.vacancy = vacancy;
