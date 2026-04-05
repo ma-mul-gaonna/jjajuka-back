@@ -157,18 +157,42 @@ public class SwapService {
 
         Schedule requesterSchedule = swap.getRequesterSchedule();
 
-        List<Vacancy> vacancy = vacancyRepository.findByScheduleIdAndMemberId(requesterSchedule.getId(), loginMemberId);
-        Vacancy vacancyObj = vacancy.getFirst();
+        if (requesterSchedule.getWorkDate().isBefore(LocalDate.now())) {
+            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
+        }
 
-        List<ReplacementCandidate> replacementCandidates = candidateRepository.findByVacancyIdAndCandidateMemberId(vacancyObj.getId(), loginMemberId);
-        ReplacementCandidate replacementCandidate = replacementCandidates.get(0);
+        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
+                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
+                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        Vacancy vacancy = vacancyRepository
+                .findByScheduleIdAndMemberId(requesterSchedule.getId(), swap.getRequester().getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        ReplacementCandidate replacementCandidate = vacancy == null
+                ? null
+                : candidateRepository.findByVacancyIdAndCandidateMemberId(vacancy.getId(), loginMemberId)
+                .stream()
+                .findFirst()
+                .orElse(null);
 
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
-            vacancyObj.reject();
-            replacementCandidate.reject();
 
-            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
+            if (vacancy != null) {
+                vacancy.reject();
+            }
+            if (replacementCandidate != null) {
+                replacementCandidate.reject();
+            }
+            if (vacancy != null) {
+                eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+            }
+
             return SwapDecisionResponse.from(swap);
         }
 
@@ -187,13 +211,9 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
         }
 
-        if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE) {
-            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
-        }
-
-        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
-                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
-                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
+        if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE
+                && targetSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
+                && targetSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
             throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
         }
 
@@ -204,20 +224,23 @@ public class SwapService {
         Member requesterMember = requesterSchedule.getMember();
         Member targetMember = targetSchedule.getMember();
 
-        // 실제 스케줄 교환
         requesterSchedule.changeMember(targetMember);
         targetSchedule.changeMember(requesterMember);
-
-        // 조회에서 안 사라지게 ACTIVE 유지 추천
         requesterSchedule.changeStatus(ScheduleStatus.ACTIVE);
         targetSchedule.changeStatus(ScheduleStatus.ACTIVE);
 
-        // swap 요청 상태 변경
         swap.accept(targetSchedule);
-        vacancyObj.accept();
-        replacementCandidate.accept();
 
-        eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
+        if (vacancy != null) {
+            vacancy.accept();
+        }
+        if (replacementCandidate != null) {
+            replacementCandidate.accept();
+        }
+        if (vacancy != null) {
+            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+        }
+
         return SwapDecisionResponse.from(swap);
     }
 }
