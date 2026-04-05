@@ -157,19 +157,33 @@ public class SwapService {
 
         Schedule requesterSchedule = swap.getRequesterSchedule();
 
-        List<Vacancy> vacancy = vacancyRepository.findByScheduleIdAndMemberId(requesterSchedule.getId(), loginMemberId);
-        Vacancy vacancyObj = vacancy.getFirst();
+        Vacancy vacancy = vacancyRepository
+                .findByScheduleIdAndMemberId(requesterSchedule.getId(), swap.getRequester().getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
 
-        List<ReplacementCandidate> replacementCandidates = candidateRepository.findByVacancyIdAndCandidateMemberId(vacancyObj.getId(), loginMemberId);
-        ReplacementCandidate replacementCandidate = replacementCandidates.get(0);
+        ReplacementCandidate replacementCandidate = null;
+        if (vacancy != null) {
+            replacementCandidate = candidateRepository
+                    .findByVacancyIdAndCandidateMemberId(vacancy.getId(), loginMemberId)
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+        }
 
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
-            vacancyObj.reject();
-            replacementCandidate.reject();
 
-            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
-            return SwapDecisionResponse.from(swap);
+            if (vacancy != null) {
+                vacancy.reject();
+                if (replacementCandidate != null) {
+                    replacementCandidate.reject();
+                }
+                eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+            }
+
+            return SwapDecisionResponse.rejected(swap);
         }
 
         if (request.getTargetScheduleId() == null) {
@@ -204,20 +218,22 @@ public class SwapService {
         Member requesterMember = requesterSchedule.getMember();
         Member targetMember = targetSchedule.getMember();
 
-        // 실제 스케줄 교환
         requesterSchedule.changeMember(targetMember);
         targetSchedule.changeMember(requesterMember);
 
-        // 조회에서 안 사라지게 ACTIVE 유지 추천
         requesterSchedule.changeStatus(ScheduleStatus.ACTIVE);
         targetSchedule.changeStatus(ScheduleStatus.ACTIVE);
 
-        // swap 요청 상태 변경
         swap.accept(targetSchedule);
-        vacancyObj.accept();
-        replacementCandidate.accept();
 
-        eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
-        return SwapDecisionResponse.from(swap);
+        if (vacancy != null) {
+            vacancy.accept();
+            if (replacementCandidate != null) {
+                replacementCandidate.accept();
+            }
+            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+        }
+
+        return SwapDecisionResponse.accepted(swap);
     }
 }
