@@ -197,10 +197,6 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_BELONG_TO_TARGET);
         }
 
-        if (targetSchedule.getWorkDate().isBefore(LocalDate.now())) {
-            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
-        }
-
         if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE) {
             throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
         }
