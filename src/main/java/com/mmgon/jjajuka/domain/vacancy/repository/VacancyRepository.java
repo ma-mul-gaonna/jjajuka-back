@@ -35,4 +35,6 @@ public interface VacancyRepository extends JpaRepository<Vacancy, Integer> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("DELETE FROM Vacancy v WHERE v.schedule.scheduleGroup.id = :scheduleGroupId")
     void deleteAllByScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
+
+    List<Vacancy> findByScheduleIdAndMemberId(Integer scheduleId, Integer memberId);
 }

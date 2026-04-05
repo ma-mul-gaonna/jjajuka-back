@@ -17,10 +17,14 @@ import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
+import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.domain.vacancy.event.VacancyCreatedEvent;
+import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.SwapStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +42,8 @@ public class SwapService {
     private final ScheduleRepository scheduleRepository;
     private final NotificationService notificationService;
     private final DiscordNotificationService discordNotificationService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final VacancyRepository vacancyRepository;
 
     public List<SwapAdminResponse> getAdminSwapList() {
         return swapRepository.findAllWithDetails()
@@ -146,16 +152,22 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.INVALID_SWAP_STATUS);
         }
 
+        Schedule requesterSchedule = swap.getRequesterSchedule();
+
+        List<Vacancy> vacancy = vacancyRepository.findByScheduleIdAndMemberId(requesterSchedule.getId(), loginMemberId);
+        Vacancy vacancyObj = vacancy.getFirst();
+
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
+            vacancyObj.reject();
+
+            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
             return SwapDecisionResponse.from(swap);
         }
 
         if (request.getTargetScheduleId() == null) {
             throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_REQUIRED);
         }
-
-        Schedule requesterSchedule = swap.getRequesterSchedule();
 
         Schedule targetSchedule = scheduleRepository.findById(request.getTargetScheduleId())
                 .orElseThrow(() -> new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_FOUND));
@@ -196,6 +208,9 @@ public class SwapService {
         // swap 요청 상태 변경
         swap.accept(targetSchedule);
 
+        vacancyObj.accept();
+
+        eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancyObj));
         return SwapDecisionResponse.from(swap);
     }
 }

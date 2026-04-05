@@ -38,6 +38,14 @@ public class Vacancy {
     @Column(length = 255)
     private String reason;
 
+    public void accept() {
+        status = VacancyStatus.APPROVED;
+    }
+
+    public void reject() {
+        status = VacancyStatus.REJECTED;
+    }
+
     @Builder
     public Vacancy(Member member, Schedule schedule, LocalDate createdAt, VacancyStatus status, String reason) {
         this.member = member;
