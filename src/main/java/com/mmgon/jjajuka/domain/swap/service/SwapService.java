@@ -44,7 +44,6 @@ public class SwapService {
     private final ScheduleRepository scheduleRepository;
     private final NotificationService notificationService;
     private final DiscordNotificationService discordNotificationService;
-    private final ApplicationEventPublisher eventPublisher;
     private final VacancyRepository vacancyRepository;
     private final ReplacementCandidateRepository candidateRepository;
 
@@ -147,10 +146,6 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.UNAUTHORIZED);
         }
 
-        if (swap.getStatus() != SwapStatus.PENDING) {
-            throw new SwapException(SwapErrorCode.SWAP_ALREADY_PROCESSED);
-        }
-
         if (request.getSwapStatus() == SwapStatus.PENDING) {
             throw new SwapException(SwapErrorCode.INVALID_SWAP_STATUS);
         }
@@ -177,10 +172,10 @@ public class SwapService {
 
             if (vacancy != null) {
                 vacancy.reject();
-                if (replacementCandidate != null) {
-                    replacementCandidate.reject();
-                }
-                eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+            }
+
+            if (replacementCandidate != null) {
+                replacementCandidate.reject();
             }
 
             return SwapDecisionResponse.rejected(swap);
@@ -224,10 +219,10 @@ public class SwapService {
 
         if (vacancy != null) {
             vacancy.accept();
-            if (replacementCandidate != null) {
-                replacementCandidate.accept();
-            }
-            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
+        }
+
+        if (replacementCandidate != null) {
+            replacementCandidate.accept();
         }
 
         return SwapDecisionResponse.accepted(swap);
