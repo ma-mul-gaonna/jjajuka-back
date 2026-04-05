@@ -69,4 +69,12 @@ public class Schedule {
                 .status(status)
                 .build();
     }
+
+    public void changeMember(Member member) {
+        this.member = member;
+    }
+
+    public void changeStatus(ScheduleStatus status) {
+        this.status = status;
+    }
 }

@@ -155,6 +155,8 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_REQUIRED);
         }
 
+        Schedule requesterSchedule = swap.getRequesterSchedule();
+
         Schedule targetSchedule = scheduleRepository.findById(request.getTargetScheduleId())
                 .orElseThrow(() -> new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_FOUND));
 
@@ -170,6 +172,28 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
         }
 
+        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
+                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
+                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        if (requesterSchedule.getId().equals(targetSchedule.getId())) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        Member requesterMember = requesterSchedule.getMember();
+        Member targetMember = targetSchedule.getMember();
+
+        // 실제 스케줄 교환
+        requesterSchedule.changeMember(targetMember);
+        targetSchedule.changeMember(requesterMember);
+
+        // 조회에서 안 사라지게 ACTIVE 유지 추천
+        requesterSchedule.changeStatus(ScheduleStatus.ACTIVE);
+        targetSchedule.changeStatus(ScheduleStatus.ACTIVE);
+
+        // swap 요청 상태 변경
         swap.accept(targetSchedule);
 
         return SwapDecisionResponse.from(swap);
