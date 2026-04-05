@@ -46,7 +46,6 @@ public class SwapService {
     private final DiscordNotificationService discordNotificationService;
     private final VacancyRepository vacancyRepository;
     private final ReplacementCandidateRepository candidateRepository;
-    private final ApplicationEventPublisher eventPublisher;
 
     public List<SwapAdminResponse> getAdminSwapList() {
         return swapRepository.findAllWithDetails()
@@ -220,7 +219,6 @@ public class SwapService {
 
         if (vacancy != null) {
             vacancy.accept();
-            eventPublisher.publishEvent(new VacancyCreatedEvent(this, vacancy));
         }
 
         if (replacementCandidate != null) {
