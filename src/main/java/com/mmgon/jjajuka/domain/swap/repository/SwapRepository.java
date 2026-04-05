@@ -29,8 +29,10 @@ public interface SwapRepository extends JpaRepository<Swap, Integer> {
     );
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("DELETE FROM Swap s " +
-            "WHERE s.requesterSchedule.scheduleGroup.id = :scheduleGroupId " +
-            "   OR s.targetSchedule.scheduleGroup.id = :scheduleGroupId")
-    void deleteAllByScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
+    @Query("DELETE FROM Swap s WHERE s.requesterSchedule.scheduleGroup.id = :scheduleGroupId")
+    void deleteAllByRequesterScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("DELETE FROM Swap s WHERE s.targetSchedule IS NOT NULL AND s.targetSchedule.scheduleGroup.id = :scheduleGroupId")
+    void deleteAllByTargetScheduleGroupId(@Param("scheduleGroupId") Integer scheduleGroupId);
 }

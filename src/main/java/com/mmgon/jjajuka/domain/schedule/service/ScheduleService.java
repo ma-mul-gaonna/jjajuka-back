@@ -72,9 +72,9 @@ public class ScheduleService {
                 ));
 
         deleteRelatedSchedulesData(scheduleGroup.getId());
+        scheduleRepository.deleteByScheduleGroupId(scheduleGroup.getId());
 
         scheduleGroup.updateReason(reason);
-        scheduleRepository.deleteByScheduleGroupId(scheduleGroup.getId());
 
         Map<Integer, Member> memberMap = loadMemberMap(aiScheduleResponse);
 
@@ -187,9 +187,10 @@ public class ScheduleService {
     }
 
     private void deleteRelatedSchedulesData(Integer scheduleGroupId) {
+        swapRepository.deleteAllByRequesterScheduleGroupId(scheduleGroupId);
+        swapRepository.deleteAllByTargetScheduleGroupId(scheduleGroupId);
         replacementCandidateRepository.deleteAllByScheduleGroupId(scheduleGroupId);
         vacancyRepository.deleteAllByScheduleGroupId(scheduleGroupId);
-        swapRepository.deleteAllByScheduleGroupId(scheduleGroupId);
     }
 
     private boolean isVisibleSchedule(Schedule schedule) {
