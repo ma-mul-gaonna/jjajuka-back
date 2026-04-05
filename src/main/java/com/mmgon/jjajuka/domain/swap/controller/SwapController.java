@@ -4,8 +4,10 @@ import com.mmgon.jjajuka.domain.auth.dto.LoginResponse;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapCreateRequest;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapDecisionRequest;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapCreateResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapAdminResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapDecisionResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapSentResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -31,6 +33,11 @@ public class SwapController {
     @GetMapping("/swaps")
     public ResponseEntity<List<Swap>> getAll() {
         return ResponseEntity.ok(swapService.findAll());
+    }
+
+    @GetMapping("/shift-swap")
+    public ResponseEntity<List<SwapAdminResponse>> getAdminSwapList() {
+        return ResponseEntity.ok(swapService.getAdminSwapList());
     }
 
     @GetMapping("/swaps/{id}")

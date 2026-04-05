@@ -11,6 +11,8 @@ import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import com.mmgon.jjajuka.domain.vacancy.event.VacancyCreatedEvent;
 import com.mmgon.jjajuka.domain.vacancy.exception.VacancyErrorCode;
 import com.mmgon.jjajuka.domain.vacancy.exception.VacancyException;
+import com.mmgon.jjajuka.domain.swap.entity.Swap;
+import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
 import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.VacancyStatus;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ public class VacancyService {
     private final VacancyRepository vacancyRepository;
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
+    private final SwapRepository swapRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     public List<Vacancy> findAll() {
@@ -82,7 +85,11 @@ public class VacancyService {
         List<Vacancy> vacancies = vacancyRepository.findAllWithMemberAndSchedule();
 
         List<VacancyDto> vacancyDtos = vacancies.stream()
-                .map(VacancyDto::from)
+                .map(vacancy -> {
+                    Swap swap = swapRepository.findByRequesterScheduleId(vacancy.getSchedule().getId())
+                            .orElse(null);
+                    return VacancyDto.from(vacancy, swap);
+                })
                 .toList();
 
         return VacancyListResponse.builder()

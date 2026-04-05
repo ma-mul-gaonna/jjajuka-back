@@ -7,9 +7,11 @@ import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapCreateRequest;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapDecisionRequest;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapAdminResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapCreateResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapDecisionResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapSentResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
@@ -36,6 +38,13 @@ public class SwapService {
     private final ScheduleRepository scheduleRepository;
     private final NotificationService notificationService;
     private final DiscordNotificationService discordNotificationService;
+
+    public List<SwapAdminResponse> getAdminSwapList() {
+        return swapRepository.findAllWithDetails()
+                .stream()
+                .map(SwapAdminResponse::from)
+                .toList();
+    }
 
     public List<Swap> findAll() {
         return swapRepository.findAll();
@@ -84,6 +93,13 @@ public class SwapService {
         }
 
         return SwapCreateResponse.success();
+    }
+
+    public List<SwapSentResponse> getSentSwaps(Integer loginMemberId) {
+        return swapRepository.findSentSwapsByMemberId(loginMemberId)
+                .stream()
+                .map(SwapSentResponse::from)
+                .toList();
     }
 
     public List<SwapResponse> getReceivedSwaps(Integer loginMemberId) {

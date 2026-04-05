@@ -1,6 +1,8 @@
 package com.mmgon.jjajuka.domain.vacancy.dto.response;
 
+import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.global.enums.SwapStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,6 +16,7 @@ public class VacancyDto {
     private ScheduleInfo schedule;
     private String reason;
     private String status;
+    private SwapStatus swapStatus;
     private String createdAt;
 
     @Getter
@@ -25,6 +28,10 @@ public class VacancyDto {
     }
 
     public static VacancyDto from(Vacancy vacancy) {
+        return from(vacancy, null);
+    }
+
+    public static VacancyDto from(Vacancy vacancy, Swap swap) {
         return VacancyDto.builder()
                 .vacancyId(vacancy.getId())
                 .memberId(vacancy.getMember().getId())
@@ -37,6 +44,7 @@ public class VacancyDto {
                         .build())
                 .reason(vacancy.getReason())
                 .status(vacancy.getStatus().name())
+                .swapStatus(swap != null ? swap.getStatus() : null)
                 .createdAt(vacancy.getCreatedAt().toString())
                 .build();
     }
