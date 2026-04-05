@@ -15,6 +15,7 @@ import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import com.mmgon.jjajuka.domain.vacancy.exception.VacancyException;
 import com.mmgon.jjajuka.domain.vacancy.repository.ReplacementCandidateRepository;
 import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
+import com.mmgon.jjajuka.global.enums.Authority;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -72,7 +73,7 @@ public class ReplacementRecommendationService {
                 .orElseThrow(() -> new IllegalStateException("ScheduleRule이 없습니다."));
 
         List<RuleCustom> ruleCustom = ruleCustomRepository.findByScheduleRuleId(rule.getId());
-        List<Member> members = memberRepository.findAll();
+        List<Member> members = memberRepository.findAllByAuthority(Authority.USER);
 
         String url = aiBaseUrl + "/api/recommend-replacement";
 
