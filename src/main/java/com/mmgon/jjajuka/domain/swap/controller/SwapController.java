@@ -82,7 +82,7 @@ public class SwapController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/shift-swap/{swapId}/decision")
+    @PatchMapping("/shift-swap/{swapId}/decision")
     public ResponseEntity<SwapDecisionResponse> respondToSwap(
             @PathVariable Integer swapId,
             @RequestBody @Valid SwapDecisionRequest request,

@@ -1,9 +1,6 @@
 package com.mmgon.jjajuka.domain.member.entity;
 
-import com.mmgon.jjajuka.global.enums.Authority;
-import com.mmgon.jjajuka.global.enums.EmploymentStatus;
-import com.mmgon.jjajuka.global.enums.ScheduleType;
-import com.mmgon.jjajuka.global.enums.Skills;
+import com.mmgon.jjajuka.global.enums.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
