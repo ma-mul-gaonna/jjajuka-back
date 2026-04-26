@@ -7,18 +7,26 @@ import com.mmgon.jjajuka.domain.schedule.entity.Schedule;
 import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapCreateRequest;
 import com.mmgon.jjajuka.domain.swap.dto.request.SwapDecisionRequest;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapAdminResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapCreateResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapDecisionResponse;
 import com.mmgon.jjajuka.domain.swap.dto.response.SwapResponse;
+import com.mmgon.jjajuka.domain.swap.dto.response.SwapSentResponse;
 import com.mmgon.jjajuka.domain.swap.entity.Swap;
 import com.mmgon.jjajuka.domain.swap.exception.SwapErrorCode;
 import com.mmgon.jjajuka.domain.swap.exception.SwapException;
 import com.mmgon.jjajuka.domain.swap.repository.SwapRepository;
 import com.mmgon.jjajuka.domain.swap.service.dto.DiscordWebhookRequest;
+import com.mmgon.jjajuka.domain.vacancy.entity.ReplacementCandidate;
+import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
+import com.mmgon.jjajuka.domain.vacancy.event.VacancyCreatedEvent;
+import com.mmgon.jjajuka.domain.vacancy.repository.ReplacementCandidateRepository;
+import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.SwapStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +44,15 @@ public class SwapService {
     private final ScheduleRepository scheduleRepository;
     private final NotificationService notificationService;
     private final DiscordNotificationService discordNotificationService;
+    private final VacancyRepository vacancyRepository;
+    private final ReplacementCandidateRepository candidateRepository;
+
+    public List<SwapAdminResponse> getAdminSwapList() {
+        return swapRepository.findAllWithDetails()
+                .stream()
+                .map(SwapAdminResponse::from)
+                .toList();
+    }
 
     public List<Swap> findAll() {
         return swapRepository.findAll();
@@ -54,6 +71,7 @@ public class SwapService {
         Schedule requesterSchedule = scheduleRepository.findById(request.getScheduleId())
                 .orElseThrow(() -> new SwapException(SwapErrorCode.SCHEDULE_NOT_FOUND));
 
+/*
         if (requesterSchedule.getStatus() != ScheduleStatus.CANCELED) {
             throw new SwapException(SwapErrorCode.SCHEDULE_NOT_CANCELLED);
         }
@@ -66,24 +84,34 @@ public class SwapService {
                 .ifPresent(existingSwap -> {
                     throw new SwapException(SwapErrorCode.SWAP_ALREADY_EXISTS);
                 });
+*/
 
         Member requester = requesterSchedule.getMember();
 
+/*
         if (requester.getId().equals(target.getId())) {
             throw new SwapException(SwapErrorCode.CANNOT_SWAP_WITH_SELF);
         }
+*/
 
         Swap swap = Swap.createSwapRequest(requester, target, requesterSchedule);
         Swap savedSwap = swapRepository.save(swap);
 
         try {
             DiscordWebhookRequest message = discordNotificationService.sendSwapRequestNotification(savedSwap);
-            notificationService.createSwapNotification(savedSwap, message);
+            //notificationService.createSwapNotification(savedSwap, message);
         } catch (Exception e) {
             log.error("Failed to send Discord notification, but swap was created successfully", e);
         }
 
         return SwapCreateResponse.success();
+    }
+
+    public List<SwapSentResponse> getSentSwaps(Integer loginMemberId) {
+        return swapRepository.findSentSwapsByMemberId(loginMemberId)
+                .stream()
+                .map(SwapSentResponse::from)
+                .toList();
     }
 
     public List<SwapResponse> getReceivedSwaps(Integer loginMemberId) {
@@ -118,17 +146,39 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.UNAUTHORIZED);
         }
 
-        if (swap.getStatus() != SwapStatus.PENDING) {
-            throw new SwapException(SwapErrorCode.SWAP_ALREADY_PROCESSED);
-        }
-
         if (request.getSwapStatus() == SwapStatus.PENDING) {
             throw new SwapException(SwapErrorCode.INVALID_SWAP_STATUS);
         }
 
+        Schedule requesterSchedule = swap.getRequesterSchedule();
+
+        Vacancy vacancy = vacancyRepository
+                .findByScheduleIdAndMemberId(requesterSchedule.getId(), swap.getRequester().getId())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        ReplacementCandidate replacementCandidate = null;
+        if (vacancy != null) {
+            replacementCandidate = candidateRepository
+                    .findByVacancyIdAndCandidateMemberId(vacancy.getId(), loginMemberId)
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+        }
+
         if (request.getSwapStatus() == SwapStatus.REJECTED) {
             swap.reject();
-            return SwapDecisionResponse.from(swap);
+
+            if (vacancy != null) {
+                vacancy.reject();
+            }
+
+            if (replacementCandidate != null) {
+                replacementCandidate.reject();
+            }
+
+            return SwapDecisionResponse.rejected(swap);
         }
 
         if (request.getTargetScheduleId() == null) {
@@ -142,16 +192,39 @@ public class SwapService {
             throw new SwapException(SwapErrorCode.TARGET_SCHEDULE_NOT_BELONG_TO_TARGET);
         }
 
-        if (targetSchedule.getWorkDate().isBefore(LocalDate.now())) {
-            throw new SwapException(SwapErrorCode.SCHEDULE_IN_PAST);
-        }
-
         if (targetSchedule.getStatus() != ScheduleStatus.ACTIVE) {
             throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
         }
 
+        if (requesterSchedule.getStatus() != ScheduleStatus.ACTIVE
+                && requesterSchedule.getStatus() != ScheduleStatus.VACANCY_PENDING
+                && requesterSchedule.getStatus() != ScheduleStatus.SWAP_PENDING) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        if (requesterSchedule.getId().equals(targetSchedule.getId())) {
+            throw new SwapException(SwapErrorCode.INVALID_SCHEDULE);
+        }
+
+        Member requesterMember = requesterSchedule.getMember();
+        Member targetMember = targetSchedule.getMember();
+
+        requesterSchedule.changeMember(targetMember);
+        targetSchedule.changeMember(requesterMember);
+
+        requesterSchedule.changeStatus(ScheduleStatus.ACTIVE);
+        targetSchedule.changeStatus(ScheduleStatus.ACTIVE);
+
         swap.accept(targetSchedule);
 
-        return SwapDecisionResponse.from(swap);
+        if (vacancy != null) {
+            vacancy.accept();
+        }
+
+        if (replacementCandidate != null) {
+            replacementCandidate.accept();
+        }
+
+        return SwapDecisionResponse.accepted(swap);
     }
 }

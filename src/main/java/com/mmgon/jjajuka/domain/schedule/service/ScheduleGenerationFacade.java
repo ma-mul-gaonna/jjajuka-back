@@ -2,7 +2,6 @@ package com.mmgon.jjajuka.domain.schedule.service;
 
 import com.mmgon.jjajuka.domain.dayoff.entity.Dayoff;
 import com.mmgon.jjajuka.domain.dayoff.repository.DayoffRepository;
-import com.mmgon.jjajuka.domain.member.entity.Member;
 import com.mmgon.jjajuka.domain.member.repository.MemberRepository;
 import com.mmgon.jjajuka.domain.rule.dto.ScheduleRuleDto;
 import com.mmgon.jjajuka.domain.rule.entity.ScheduleRule;
@@ -12,12 +11,13 @@ import com.mmgon.jjajuka.domain.schedule.Mapper.AiScheduleRequestMapper;
 import com.mmgon.jjajuka.domain.schedule.controller.request.AiScheduleRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.request.ScheduleGenerateRequest;
 import com.mmgon.jjajuka.domain.schedule.controller.response.AiScheduleResponse;
-import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleGenerateResponse;
+import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleResponse;
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.DayoffStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -36,12 +36,17 @@ public class ScheduleGenerationFacade {
     private final ScheduleService scheduleService;
     private final AiScheduleRequestMapper aiScheduleRequestMapper;
 
-    public ScheduleGenerateResponse generateWithRules(ScheduleGenerateRequest request) {
+    @Transactional
+    public ScheduleResponse generateWithRules(ScheduleGenerateRequest request) {
         // 1. 규칙 저장
         ScheduleRuleDto.Response savedRuleDto = scheduleRuleService.create(request.getRule());
 
-        ScheduleRule savedRule = scheduleRuleRepository.findById(savedRuleDto.id())
+        ScheduleRule savedRule = scheduleRuleRepository.findWithRuleCustomsById(savedRuleDto.id())
                 .orElseThrow(() -> new IllegalArgumentException("저장된 규칙을 찾을 수 없습니다."));
+
+        List<String> ruleCustomValues = savedRule.getRuleCustoms().stream()
+                .map(ruleCustom -> ruleCustom.getCustomValue())
+                .toList();
 
         // 2. 사원 조회
         var members = memberRepository.findAllByAuthority(Authority.USER);
@@ -60,7 +65,9 @@ public class ScheduleGenerationFacade {
                 savedRule,
                 members,
                 approvedDayoffs,
-                request.getUserRequests()
+                request.getShifts(),
+                request.getUserRequests(),
+                ruleCustomValues
         );
 
         // 5. AI 호출
@@ -73,12 +80,10 @@ public class ScheduleGenerationFacade {
                 request.getReason(),
                 aiResponse
         );
-        // 7. 응답
-        return ScheduleGenerateResponse.builder()
-                .ruleId(savedRuleDto.id())
-                .scheduleGroupId(scheduleGroupId)
-                .scheduleYearMonth(request.getScheduleYearMonth())
-                .message("근무표 규칙 저장 및 AI 근무표 생성이 완료되었습니다.")
-                .build();
+
+
+        // 7. 저장된 결과를 프론트 조회 형식으로 반환
+        return scheduleService.getSchedules(scheduleGroupId);
+
     }
 }

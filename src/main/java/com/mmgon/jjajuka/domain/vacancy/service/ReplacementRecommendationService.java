@@ -15,12 +15,15 @@ import com.mmgon.jjajuka.domain.vacancy.entity.Vacancy;
 import com.mmgon.jjajuka.domain.vacancy.exception.VacancyException;
 import com.mmgon.jjajuka.domain.vacancy.repository.ReplacementCandidateRepository;
 import com.mmgon.jjajuka.domain.vacancy.repository.VacancyRepository;
+import com.mmgon.jjajuka.global.enums.Authority;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import com.mmgon.jjajuka.global.enums.VacancyStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,27 +46,81 @@ public class ReplacementRecommendationService {
     @Value("${ai.base-url}")
     private String aiBaseUrl;
 
-    public RecommendationResponse recommend(Integer vacancyId) {
+    public List<RecommendationResponse> exist() {
+        List<Vacancy> pendingVacancies = vacancyRepository.findAllByStatus(VacancyStatus.PENDING);
 
-        Vacancy vacancy = vacancyRepository.findById(vacancyId)
-                .orElseThrow(() -> new VacancyException(VACANCY_NOT_FOUND));
+        List<RecommendationResponse> responses = pendingVacancies.stream()
+                .map(vacancy -> {
+                    boolean exists = candidateRepository.existsByVacancyId(vacancy.getId());
 
-        Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
-        List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
-        List<Member> members = memberRepository.findAll();
+                    if (exists) {
+                        return createResponseFromExistingCandidates(vacancy);
+                    } else {
+                        return null;
+                    }
+                })
+                .toList();
+
+        return responses;
+    }
+
+    public List<RecommendationResponse> recommend() {
+
+        List<Vacancy> pendingVacancies = vacancyRepository.findAllByStatus(VacancyStatus.PENDING);
 
         ScheduleRule rule = scheduleRuleRepository.findAll().stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("ScheduleRule이 없습니다."));
 
         List<RuleCustom> ruleCustom = ruleCustomRepository.findByScheduleRuleId(rule.getId());
-
-        AIRecommendationRequest request = createAiRequest(vacancy, schedules, members, rule, ruleCustom);
+        List<Member> members = memberRepository.findAllByAuthority(Authority.USER);
 
         String url = aiBaseUrl + "/api/recommend-replacement";
 
+        return pendingVacancies.stream()
+                .map(vacancy -> recommendForVacancy(vacancy, members, rule, ruleCustom, url))
+                .toList();
+    }
+
+    private RecommendationResponse createResponseFromExistingCandidates(Vacancy vacancy) {
+
+        List<ReplacementCandidate> candidates = candidateRepository.findByVacancyIdOrderByCandidateRankAsc(vacancy.getId());
+
+        List<RecommendationResponse.RecommendationDto> recommendationDtos =
+                candidates.stream()
+                        .map(c -> RecommendationResponse.RecommendationDto.builder()
+                                .userId(c.getCandidateMember().getId().longValue())
+                                .userName(c.getCandidateMember().getName())
+                                .rank(c.getCandidateRank())
+                                .reasons(c.getReason())
+                                .score(c.getScore())
+                                .status(c.getStatus())
+                                .build())
+                        .toList();
+
+        return RecommendationResponse.builder()
+                .vacancyId(vacancy.getId())
+                .scheduleId(vacancy.getSchedule().getId())
+                .vacancyMemberName(vacancy.getMember().getName())
+                .recommendations(recommendationDtos)
+                .build();
+    }
+
+    private RecommendationResponse recommendForVacancy(
+            Vacancy vacancy,
+            List<Member> members,
+            ScheduleRule rule,
+            List<RuleCustom> ruleCustom,
+            String url
+    ) {
+        Integer scheduleGroupId = vacancy.getSchedule().getScheduleGroup().getId();
+        List<Schedule> schedules = scheduleRepository.findByScheduleGroupId(scheduleGroupId);
+
+        AIRecommendationRequest request = createAiRequest(vacancy, schedules, members, rule, ruleCustom);
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Connection", "close");
 
         HttpEntity<AIRecommendationRequest> httpEntity = new HttpEntity<>(request, headers);
 
@@ -75,10 +132,10 @@ public class ReplacementRecommendationService {
         );
 
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
-            throw new IllegalStateException("AI 서버 호출에 실패했습니다.");
+            throw new IllegalStateException("AI 서버 호출에 실패했습니다. vacancyId=" + vacancy.getId());
         }
 
-        candidateRepository.deleteByVacancyId(vacancyId);
+        candidateRepository.deleteByVacancyId(vacancy.getId());
 
         List<ReplacementCandidate> candidates = response.getBody().getRecommendations().stream()
                 .map(r -> {
@@ -88,14 +145,19 @@ public class ReplacementRecommendationService {
                             .vacancy(vacancy)
                             .candidateMember(member)
                             .candidateRank(r.getRank())
-                            .reason(String.join(", ", r.getReasons()))
+                            .reason(r.getReasons())
+                            .score(r.getScore())
                             .isSelected(false)
                             .build();
                 }).toList();
 
         candidateRepository.saveAll(candidates);
 
-        return response.getBody();
+        RecommendationResponse result = response.getBody();
+        result.setVacancyId(vacancy.getId());
+        result.setScheduleId(vacancy.getSchedule().getId());
+        result.setVacancyMemberName(vacancy.getMember().getName());
+        return result;
     }
 
     private AIRecommendationRequest createAiRequest(

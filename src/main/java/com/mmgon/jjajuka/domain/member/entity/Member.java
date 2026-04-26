@@ -1,9 +1,6 @@
 package com.mmgon.jjajuka.domain.member.entity;
 
-import com.mmgon.jjajuka.global.enums.Authority;
-import com.mmgon.jjajuka.global.enums.EmploymentStatus;
-import com.mmgon.jjajuka.global.enums.ScheduleType;
-import com.mmgon.jjajuka.global.enums.Skills;
+import com.mmgon.jjajuka.global.enums.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -54,9 +51,18 @@ public class Member {
     @Column(nullable = false)
     private ScheduleType preferredShifts;
 
-    public static Member create(String name, String loginId, String password, Authority authority,
-                                String position, String phoneNumber, LocalDate hireDate,
-                                EmploymentStatus employmentStatus, Skills skills) {
+    public static Member create(
+            String name,
+            String loginId,
+            String password,
+            Authority authority,
+            String position,
+            String phoneNumber,
+            LocalDate hireDate,
+            EmploymentStatus employmentStatus,
+            Skills skills,
+            ScheduleType preferredShifts
+    ) {
         Member member = new Member();
         member.name = name;
         member.loginId = loginId;
@@ -67,6 +73,7 @@ public class Member {
         member.hireDate = hireDate;
         member.employmentStatus = employmentStatus;
         member.skills = skills;
+        member.preferredShifts = preferredShifts;
         return member;
     }
 }
