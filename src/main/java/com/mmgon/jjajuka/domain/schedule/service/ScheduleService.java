@@ -11,6 +11,7 @@ import com.mmgon.jjajuka.domain.schedule.repository.ScheduleRepository;
 import com.mmgon.jjajuka.global.enums.ScheduleStatus;
 import com.mmgon.jjajuka.global.enums.ScheduleType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ScheduleService {
 
     private final ScheduleRepository scheduleRepository;
@@ -71,7 +73,7 @@ public class ScheduleService {
                     );
                 })
                 .toList();
-
+        log.info("-------------------------------"+schedules.size()+"------------------------------");
         scheduleRepository.saveAll(schedules);
 
         return scheduleGroup.getId();

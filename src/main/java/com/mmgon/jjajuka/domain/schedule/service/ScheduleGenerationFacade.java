@@ -16,6 +16,7 @@ import com.mmgon.jjajuka.domain.schedule.controller.response.ScheduleGenerateRes
 import com.mmgon.jjajuka.global.enums.Authority;
 import com.mmgon.jjajuka.global.enums.DayoffStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScheduleGenerationFacade {
 
     private final ScheduleRuleService scheduleRuleService;
@@ -63,6 +65,7 @@ public class ScheduleGenerationFacade {
 
         // 5. AI 호출
         AiScheduleResponse aiResponse = aiScheduleClient.generate(aiRequest);
+        log.info(aiResponse.toString());
 
         // 6. 스케줄 저장
         Integer scheduleGroupId = scheduleService.saveGeneratedSchedules(
@@ -70,7 +73,6 @@ public class ScheduleGenerationFacade {
                 request.getReason(),
                 aiResponse
         );
-
         // 7. 응답
         return ScheduleGenerateResponse.builder()
                 .ruleId(savedRuleDto.id())
